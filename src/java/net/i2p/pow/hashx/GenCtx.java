@@ -35,7 +35,6 @@ class GenCtx {
 
         ports = new EPort[PORT_MAP_SIZE][NUM_PORTS];
         for (int i = 0; i < PORT_MAP_SIZE; i++) {
-            ports[i] = new EPort[NUM_PORTS];
             for (int j = 0; j < NUM_PORTS; j++) {
                 ports[i][j] = EPort.PORT_NONE;
             }
