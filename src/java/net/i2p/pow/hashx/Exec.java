@@ -2,24 +2,21 @@ package net.i2p.pow.hashx;
 
 class Exec {
 
-    private static long LO(long x) { return x & 0xffffffffL; }
-    private static long HI(long x) { return (x >> 32) & 0xffffffffL; }
-
-    private static long umulh(long a, long b) {
-        long ah = HI(a), al = LO(a);
-        long bh = HI(b), bl = LO(b);
+    static long umulh(long a, long b) {
+        long ah = ((a >> 32) & 0xffffffffL), al = a & 0xffffffffL;
+        long bh = ((b >> 32) & 0xffffffffL), bl = b & 0xffffffffL;
         long x00 = al * bl;
         long x01 = al * bh;
         long x10 = ah * bl;
         long x11 = ah * bh;
-        long m1 = LO(x10) + LO(x01) + HI(x00);
-        long m2 = HI(x10) + HI(x01) + LO(x11) + HI(m1);
-        long m3 = HI(x11) + HI(m2);
+        long m1 = (x10 & 0xffffffffL) + (x01 & 0xffffffffL) + ((x00 >> 32) & 0xffffffffL);
+        long m2 = ((x10 >> 32) & 0xffffffffL) + ((x01 >> 32) & 0xffffffffL) + (x11 & 0xffffffffL) + ((m1 >> 32) & 0xffffffffL);
+        long m3 = ((x11 >> 32) & 0xffffffffL) + ((m2 >> 32) & 0xffffffffL);
 
-        return (m3 << 32) + LO(m2);
+        return (m3 << 32) + (m2 & 0xffffffffL);
     }
 
-    private static long smulh(long a, long b) {
+    static long smulh(long a, long b) {
         long hi = umulh(a, b);
         if (a < 0) hi -= b;
         if (b < 0) hi -= a;
@@ -30,7 +27,7 @@ class Exec {
         int target = 0;
         boolean branch_enable = true;
         int result = 0;
-        int branch_idx = 0;
+        //int branch_idx = 0;
         for (int i = 0; i < program.length; i++) {
             Instr instr = program[i];
             switch (instr.opcode) {
@@ -81,7 +78,7 @@ class Exec {
                         i = target;
                         branch_enable = false;
                     }
-                    branch_idx++;
+                    //branch_idx++;
                     break;
 
                 default:
