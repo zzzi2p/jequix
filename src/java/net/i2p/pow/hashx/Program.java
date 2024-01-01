@@ -6,7 +6,7 @@ import static net.i2p.pow.hashx.IType.*;
 
 class Program {
 
-    private static final boolean TRACE = true;
+    private static final boolean TRACE = false;
     static final int BRANCH_MASK = 0x80000000;
 
     /* If the instruction is a multiplication.  */
@@ -94,20 +94,16 @@ class Program {
         // * register r5 cannot be the destination of the IADD_RS instruction (limitation of the x86 lea instruction) */
         for (int i = 0; i < 8; ++i) {
             boolean available = ctx.registers[i].latency <= cycle;
-            //if (!available) printf("Reg %d unavailable (cycle)", i);
             available &= ((!tpl.distinct_dst) || (i != instr.src));
-            //if (!available) printf("Reg %d unavailable (distinct)", i);
             available &= (ctx.chain_mul || (tpl.group != INSTR_MUL_R) || (ctx.registers[i].last_op != INSTR_MUL_R));
-            //if (!available) printf("Reg %d unavailable (mul)", i);
             available &= ((ctx.registers[i].last_op != tpl.group) || (ctx.registers[i].last_op_par != instr.op_par));
-            //if (!available) printf("Reg %d unavailable (last)", i);
             available &= ((instr.opcode != INSTR_ADD_RS) || (i != REGISTER_NEEDS_DISPLACEMENT));
             if (available)
                 available_regs[regs_count++] = i;
         }
         int dst = select_register(available_regs, regs_count, ctx.gen);
         if (dst < 0) {
-            printf("No reg available out of %d\n", regs_count);
+            if (TRACE) printf("No reg available out of %d\n", regs_count);
             return false;
         }
         instr.dst = dst;
@@ -153,21 +149,21 @@ class Program {
                 if (commit) {
                     ctx.ports[cycle][2] = uop;
                 }
-                TRACE_PRINT("%s scheduled to port P5 at cycle %s (commit = %s)\n", uop, cycle, commit);
+                if (TRACE) TRACE_PRINT("%s scheduled to port P5 at cycle %s (commit = %s)\n", uop, cycle, commit);
                 return cycle;
             }
             if ((uop.port & PORT_P0.port) != 0 && ctx.ports[cycle][0] == PORT_NONE) {
                 if (commit) {
                     ctx.ports[cycle][0] = uop;
                 }
-                TRACE_PRINT("%s scheduled to port P0 at cycle %s (commit = %s)\n", uop, cycle, commit);
+                if (TRACE) TRACE_PRINT("%s scheduled to port P0 at cycle %s (commit = %s)\n", uop, cycle, commit);
                 return cycle;
             }
             if ((uop.port & PORT_P1.port) != 0 && ctx.ports[cycle][1] == PORT_NONE) {
                 if (commit) {
                     ctx.ports[cycle][1] = uop;
                 }
-                TRACE_PRINT("%s scheduled to port P1 at cycle %s (commit = %s)\n", uop, cycle, commit);
+                if (TRACE) TRACE_PRINT("%s scheduled to port P1 at cycle %s (commit = %s)\n", uop, cycle, commit);
                 return cycle;
             }
         }
@@ -216,18 +212,18 @@ class Program {
 
         while (program.code_size < HASHX_PROGRAM_MAX_SIZE) {
             Instr instr = program.code[program.code_size];
-            TRACE_PRINT("CYCLE: %s/%s\n", ctx.sub_cycle, ctx.cycle);
+            if (TRACE) TRACE_PRINT("CYCLE: %s/%s\n", ctx.sub_cycle, ctx.cycle);
 
             /* select an instruction template */
             ITmpl tpl = select_template(ctx, last_instr, attempt);
             last_instr = tpl.group;
-            TRACE_PRINT("Template: %s\n", tpl);
+            if (TRACE) TRACE_PRINT("Template: %s\n", tpl);
             instr_from_template(tpl, ctx.gen, instr);
 
             /* calculate the earliest cycle when this instruction (all of its uOPs) can be scheduled for execution */
             int scheduleCycle = schedule_instr(tpl, ctx, false);
             if (scheduleCycle < 0) {
-                TRACE_PRINT("Unable to map operation '%s' to execution port (cycle %s)\n", tpl.x86_asm, ctx.cycle);
+                if (TRACE) TRACE_PRINT("Unable to map operation '%s' to execution port (cycle %s)\n", tpl.x86_asm, ctx.cycle);
                 break;
             }
 
@@ -236,7 +232,7 @@ class Program {
             /* find a source register (if applicable) that will be ready when this instruction executes */
             if (tpl.has_src) {
                 if (!select_source(tpl, instr, ctx, scheduleCycle)) {
-                    TRACE_PRINT("; src STALL (attempt %s)\n", attempt);
+                    if (TRACE) TRACE_PRINT("; src STALL (attempt %s)\n", attempt);
                     if (attempt++ < MAX_RETRIES) {
                         continue;
                     }
@@ -249,14 +245,14 @@ class Program {
                     attempt = 0;
                     continue;
                 }
-                TRACE_PRINT("; src = r%s\n", instr.src);
+                if (TRACE) TRACE_PRINT("; src = r%s\n", instr.src);
             }
     
             /* find a destination register that will be ready when this instruction executes */
             if (tpl.has_dst) {
                 if (!select_destination(tpl, instr, ctx, scheduleCycle)) {
-                    TRACE_PRINT("; dst STALL for %s (attempt %s)\n", tpl, attempt);
                     if (TRACE) {
+                        TRACE_PRINT("; dst STALL for %s (attempt %s)\n", tpl, attempt);
                         print_registers(ctx);
                     }
                     if (attempt++ < MAX_RETRIES) {
@@ -271,7 +267,7 @@ class Program {
                     attempt = 0;
                     continue;
                 }
-                TRACE_PRINT("; dst = r%s\n", instr.dst);
+                if (TRACE) TRACE_PRINT("; dst = r%s\n", instr.dst);
             }
             attempt = 0;
 
@@ -279,13 +275,13 @@ class Program {
             scheduleCycle = schedule_instr(tpl, ctx, true);
 
             if (scheduleCycle < 0) {
-                TRACE_PRINT("Unable to map operation '%s' to execution port (cycle %s)\n", tpl.x86_asm, ctx.cycle);
+                if (TRACE) TRACE_PRINT("Unable to map operation '%s' to execution port (cycle %s)\n", tpl.x86_asm, ctx.cycle);
                 break;
             }
 
             /* terminating condition */
             if (scheduleCycle >= TARGET_CYCLE) {
-                TRACE_PRINT("DONE at cycle %s scheduleCycle %s\n", ctx.cycle, scheduleCycle);
+                if (TRACE) TRACE_PRINT("DONE at cycle %s scheduleCycle %s\n", ctx.cycle, scheduleCycle);
                 break;
             }
 
@@ -296,7 +292,7 @@ class Program {
                 ri.last_op = tpl.group;
                 ri.last_op_par = instr.op_par;
                 ctx.latency = Math.max(retireCycle, ctx.latency);
-                TRACE_PRINT("; RETIRED at cycle %s\n", retireCycle);
+                if (TRACE) TRACE_PRINT("; RETIRED at cycle %s\n", retireCycle);
             }
 
             program.code_size++;

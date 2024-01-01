@@ -38,7 +38,6 @@ class SipHashRNG {
         }
         count32--;
         long rv = (buffer32 >> (count32 * 32)) & 0xffffffffL;
-        System.out.println("Next int: " + Long.toUnsignedString(rv));
         return rv;
     }
 

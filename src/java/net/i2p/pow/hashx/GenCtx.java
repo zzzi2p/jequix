@@ -16,7 +16,7 @@ class GenCtx {
     static final int MAX_RETRIES = 1;
     static final int LOG2_BRANCH_PROB = 4;
 
-    static final int HASHX_PROGRAM_MAX_SIZE = 512;
+    static final int HASHX_PROGRAM_MAX_SIZE = REQUIREMENT_SIZE;
 
     final RegInfo[] registers;
     final EPort[][] ports;
