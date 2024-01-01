@@ -10,6 +10,7 @@ import net.i2p.util.RandomSource;
 import com.southernstorm.noise.crypto.blake.Blake2bMessageDigest;
 
 import net.i2p.pow.equix.Equix;
+import net.i2p.pow.equix.Result;
 import net.i2p.pow.equix.Heap;
 import net.i2p.pow.hashx.HXCtx;
 
@@ -31,7 +32,7 @@ public class POW {
     /**
      *  @return 40 byte proof
      */
-    public static byte[] solve(Hash hash, byte[] seed, int effort, int maxruns) {
+    public static byte[] solve(HXCtx ctx, Hash hash, byte[] seed, int effort, int maxruns) {
         // leave room so we use the same buffer for the check
         byte[] challenge = new byte[CHECK_LEN];
         System.arraycopy(P, 0, challenge, 0, P.length);
@@ -45,7 +46,6 @@ public class POW {
         DataHelper.toLong(challenge, off, 4, effort);
         System.out.println("Challenge:\n" + HexDump.dump(challenge, 0, CHALLENGE_LEN));
 
-        HXCtx ctx = new HXCtx(512);
         Heap heap = new Heap();
         char[][] solutions = new char[8][8];
 
@@ -92,6 +92,51 @@ public class POW {
         return null;
     }
 
+    /**
+     *  Seed match and Bloom filter not done here
+     *
+     *  @param proof 40 bytes
+     */
+    public static boolean verify(HXCtx ctx, Hash hash, byte[] seed, int effort, byte[] proof) {
+        long claimedEffort = DataHelper.fromLong(proof, NONCE_LEN, 4);
+        if (claimedEffort < effort) {
+            System.out.println("Proof does not meet required effort " + effort);
+            return false;
+        }
+        byte[] check = new byte[CHECK_LEN];
+        System.arraycopy(P, 0, check, 0, P.length);
+        int off = P.length;
+        System.arraycopy(hash.getData(), 0, check, off, Hash.HASH_LENGTH);
+        off += Hash.HASH_LENGTH;
+        System.arraycopy(seed, 0, check, off, SEED_LEN);
+        off += SEED_LEN;
+        System.arraycopy(proof, 0, check, off, NONCE_LEN + EFFORT_LEN + SOLUTION_LEN);
+        System.out.println("Verify:\n" + HexDump.dump(check));
+        MessageDigest blake = new Blake2bMessageDigest(null, null, BLAKE2B_32_LEN);
+        blake.update(check, 0, CHECK_LEN);
+        byte[] bhash = blake.digest();
+        long r = DataHelper.fromLong(bhash, 0, BLAKE2B_32_LEN);
+        long m = r * effort;
+        if (m > 0xffffffffL) {
+            System.out.println("Proof is less than claimed effort " + effort);
+            return false;
+        }
+        if (claimedEffort > effort) {
+            System.out.println("Proof effort " + claimedEffort + " is more than required effort " + effort);
+            // replace effort in proof so it will validate
+            DataHelper.toLong(proof, P.length + Hash.HASH_LENGTH + SEED_LEN + NONCE_LEN, 4, effort);
+        }
+        char[] solution = new char[8];
+        off = NONCE_LEN + EFFORT_LEN;
+        for (int j = 0; j < 8; j++) {
+            solution[j] = (char) DataHelper.fromLong(proof, off, 2);
+            off += 2;
+        }
+        Result result = Equix.verify(ctx, check, CHALLENGE_LEN, solution);
+        System.out.println("Verify result: " + result);
+        return result == Result.OK;
+    }
+
     private static void incrementNonce(byte[] challenge) {
         // tor spec says treat as a 16 byte LE value,
         // but we're not going around that many times, just do the first 8 bytes,
@@ -102,14 +147,21 @@ public class POW {
     }
 
     public static void main(String[] args) {
+        HXCtx ctx = new HXCtx(512);
         Hash h = Hash.FAKE_HASH;
         byte[] seed = h.getData();
-        byte[] proof = solve(h, seed, 8, 999);
-        if (proof != null)
+        int effort = 8;
+        byte[] proof = solve(ctx, h, seed, effort, 999);
+        if (proof != null) {
             System.out.println("Found solution:\n" + HexDump.dump(proof));
-        else
+            boolean ok = verify(ctx, h, seed, effort, proof);
+            if (ok)
+                System.out.println("Proof verify success");
+            else
+                System.out.println("Proof verify failed");
+        } else {
             System.out.println("No solution found");
-
+        }
     }
 
 }
