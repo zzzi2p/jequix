@@ -38,13 +38,13 @@ public class Heap {
 
     //union {
         //stage1_data_hashtab stage1_data;         /* 688 128 bytes */
-        private final long[][] stage1_data_buckets = new long[NUM_COARSE_BUCKETS][COARSE_BUCKET_ITEMS];
+        // see below for "union"
+        //private final long[][] stage1_data_buckets = new long[NUM_COARSE_BUCKETS][COARSE_BUCKET_ITEMS];
 
         //struct {
             //stage3_idx_hashtab stage3_indices;   /* 344 576 bytes */
             // 256 * 2 = 512
             private final char[] stage3_counts = new char[NUM_COARSE_BUCKETS];
-            // TODO we can use nio Buffers to overlap the long and int arrays
             // 256 * 336 * 4 = 344064
             private final int[][] stage3_buckets = new int[NUM_COARSE_BUCKETS][COARSE_BUCKET_ITEMS];
             //stage3_data_hashtab stage3_data;     /* 344 064 bytes */
@@ -123,7 +123,17 @@ public class Heap {
     }
 
     long STAGE1_DATA(int buck, int pos) {
-        return stage1_data_buckets[buck][pos];
+        //return stage1_data_buckets[buck][pos];
+        // "union"
+        int[] s3;
+        if (pos < COARSE_BUCKET_ITEMS / 2) {
+            s3 = stage3_buckets[buck];
+        } else {
+            s3 = stage3_data_buckets[buck];
+            pos -= COARSE_BUCKET_ITEMS / 2;
+        }
+        pos *= 2;
+        return (((long) s3[pos]) << 32) | (s3[pos + 1] & 0xffffffffL);
     }
 
     long STAGE2_DATA(int buck, int pos) {
@@ -135,7 +145,18 @@ public class Heap {
     }
 
     void SET_STAGE1_DATA(int buck, int pos, long val) {
-        stage1_data_buckets[buck][pos] = val;
+        //stage1_data_buckets[buck][pos] = val;
+        // "union"
+        int[] s3;
+        if (pos < COARSE_BUCKET_ITEMS / 2) {
+            s3 = stage3_buckets[buck];
+        } else {
+            s3 = stage3_data_buckets[buck];
+            pos -= COARSE_BUCKET_ITEMS / 2;
+        }
+        pos *= 2;
+        s3[pos] = (int) (val >> 32);
+        s3[pos + 1] = (int) val;
     }
 
     void SET_STAGE2_DATA(int buck, int pos, long val) {
