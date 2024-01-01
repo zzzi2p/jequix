@@ -44,6 +44,7 @@ public class Blake2bMessageDigest extends MessageDigest {
 	private final byte[] block;
 	private final long[] m;
 	private final long[] v;
+	private final int hlength;
 	private long length;
 	private int posn;
 	private long personal1, personal2;
@@ -53,7 +54,7 @@ public class Blake2bMessageDigest extends MessageDigest {
 	 * Constructs a new BLAKE2b message digest object.
 	 */
 	public Blake2bMessageDigest() {
-		this(null, null);
+		this(null, null, 64);
 	}
 
 	/**
@@ -62,11 +63,21 @@ public class Blake2bMessageDigest extends MessageDigest {
 	 * @param s salt must be exactly 16 bytes, or null
 	 */
 	public Blake2bMessageDigest(String p, byte[] s) {
+		this(p, s, 64);
+	}
+
+	/**
+	 * Constructs a new BLAKE2b message digest object.
+	 * @param p personaization must be 16 UTF-8 bytes or less, or null
+	 * @param s salt must be exactly 16 bytes, or null
+	 */
+	public Blake2bMessageDigest(String p, byte[] s, int hashlength) {
 		super("BLAKE2B-512");
 		h = new long [8];
 		block = new byte [128];
 		m = new long [16];
 		v = new long [16];
+		hlength = hashlength;
 		setPersonalAndSalt(p, s);
 	}
 
@@ -197,7 +208,7 @@ public class Blake2bMessageDigest extends MessageDigest {
 	@Override
 	protected void engineReset() {
                 // length 64 key len 0 fanout 1 depth 1
-		h[0] = 0x6a09e667f3bcc908L ^ 0x01010040;
+		h[0] = 0x6a09e667f3bcc908L ^ 0x01010000 ^ hlength;
 		h[1] = 0xbb67ae8584caa73bL;
 		h[2] = 0x3c6ef372fe94f82bL;
 		h[3] = 0xa54ff53a5f1d36f1L;
