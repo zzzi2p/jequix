@@ -33,6 +33,7 @@ public class POW {
      *  @return 40 byte proof
      */
     public static byte[] solve(HXCtx ctx, Hash hash, byte[] seed, int effort, int maxruns) {
+        long start = System.currentTimeMillis();
         // leave room so we use the same buffer for the check
         byte[] challenge = new byte[CHECK_LEN];
         System.arraycopy(P, 0, challenge, 0, P.length);
@@ -83,7 +84,8 @@ public class POW {
                 System.arraycopy(challenge, CHALLENGE_LEN, rv, off, SOLUTION_LEN);
                 off += SOLUTION_LEN;
                 System.arraycopy(seed, 0, rv, off, SEED_PFX_LEN);
-                System.out.println("Found proof with effort " + effort + " on run " + runs);
+                System.out.println("Found proof with effort " + effort + " on run " + runs +
+                                   " took " + (System.currentTimeMillis() - start) + " ms");
                 return rv;
             }
             System.out.println("No solutions meet effort " + effort + " on run " + runs);
@@ -98,6 +100,7 @@ public class POW {
      *  @param proof 40 bytes
      */
     public static boolean verify(HXCtx ctx, Hash hash, byte[] seed, int effort, byte[] proof) {
+        long start = System.nanoTime();
         long claimedEffort = DataHelper.fromLong(proof, NONCE_LEN, 4);
         if (claimedEffort < effort) {
             System.out.println("Proof does not meet required effort " + effort);
@@ -133,7 +136,7 @@ public class POW {
             off += 2;
         }
         Result result = Equix.verify(ctx, check, CHALLENGE_LEN, solution);
-        System.out.println("Verify result: " + result);
+        System.out.println("Verify result: " + result + " took " + ((System.nanoTime() - start) / 1000) + " us");
         return result == Result.OK;
     }
 
