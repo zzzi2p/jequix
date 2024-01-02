@@ -15,19 +15,19 @@ import net.i2p.pow.equix.Heap;
 import net.i2p.pow.hashx.HXCtx;
 
 public class POW {
-    private static final byte[] P = DataHelper.getASCII("Tor hs intro v1\0");
-    private static final int SEED_LEN = 32;
-    private static final int NONCE_LEN = 16;
-    private static final int EFFORT_LEN = 4;
+    public static final byte[] P = DataHelper.getASCII("Tor hs intro v1\0");
+    public static final int SEED_LEN = 32;
+    public static final int NONCE_LEN = 16;
+    public static final int EFFORT_LEN = 4;
     // 100
-    private static final int CHALLENGE_LEN = P.length + Hash.HASH_LENGTH + SEED_LEN + NONCE_LEN + EFFORT_LEN;
-    private static final int SOLUTION_LEN = 16;
-    private static final int SEED_PFX_LEN = 4;
+    public static final int CHALLENGE_LEN = P.length + Hash.HASH_LENGTH + SEED_LEN + NONCE_LEN + EFFORT_LEN;
+    public static final int SOLUTION_LEN = 16;
+    public static final int SEED_PFX_LEN = 4;
     // 116
-    private static final int CHECK_LEN = CHALLENGE_LEN + SOLUTION_LEN;
+    public static final int CHECK_LEN = CHALLENGE_LEN + SOLUTION_LEN;
     // 40
-    private static final int PROOF_LEN = NONCE_LEN + SOLUTION_LEN + EFFORT_LEN + SEED_PFX_LEN;
-    private static final int BLAKE2B_32_LEN = 4;
+    public static final int PROOF_LEN = NONCE_LEN + SOLUTION_LEN + EFFORT_LEN + SEED_PFX_LEN;
+    public static final int BLAKE2B_32_LEN = 4;
 
     /**
      *  @return 40 byte proof
@@ -127,7 +127,8 @@ public class POW {
         if (claimedEffort > effort) {
             System.out.println("Proof effort " + claimedEffort + " is more than required effort " + effort);
             // replace effort in proof so it will validate
-            DataHelper.toLong(proof, P.length + Hash.HASH_LENGTH + SEED_LEN + NONCE_LEN, 4, effort);
+            // no, can't do this
+            //DataHelper.toLong(proof, NONCE_LEN, 4, effort);
         }
         char[] solution = new char[8];
         off = NONCE_LEN + EFFORT_LEN;
