@@ -30,6 +30,7 @@ class Exec {
         //int branch_idx = 0;
         for (int i = 0; i < program.length; i++) {
             Instr instr = program[i];
+            //System.out.println("// inst " + i + ' ' + r[0] + ' ' + r[1] + ' ' + r[2] + ' ' + r[3] + ' ' + r[4] + ' ' + r[5] + ' ' + r[6] + ' ' + r[7]);
             switch (instr.opcode) {
                 case INSTR_UMULH_R:
                     r[instr.dst] = umulh(r[instr.dst], r[instr.src]);
@@ -70,13 +71,20 @@ class Exec {
                     break;
 
                 case INSTR_TARGET:
+                    //if (branch_enable)
+                    //    System.out.println("first instr target " + i);
+                    //else
+                    //    System.out.println("unused instr target " + i);
                     target = i;
                     break;
 
                 case INSTR_BRANCH:
                     if (branch_enable && (result & instr.imm32) == 0) {
+                        //System.out.println("branch from " + i + " to target " + target);
                         i = target;
                         branch_enable = false;
+                    } else {
+                        //System.out.println("branch not taken from " + i + " to target " + target);
                     }
                     //branch_idx++;
                     break;

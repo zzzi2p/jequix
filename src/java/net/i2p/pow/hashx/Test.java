@@ -72,6 +72,30 @@ class Test {
         return true;
     }
 
+    private static boolean test_make3() {
+        try {
+            boolean result = Compiler.compile(ctx_int, 1);
+            assert(result);
+            return true;
+        } catch (java.io.IOException ioe) {
+            ioe.printStackTrace();
+            assert(false);
+            return false;
+        }
+    }
+
+    private static boolean test_compiler_ctr1() {
+        byte[] hash = new byte[HASHX_SIZE];
+        long start = System.currentTimeMillis();
+        ctx_int.compiled = true;
+        for (int i = 0; i < 65536; i++) {
+            HashX.exec(ctx_int, counter2, hash);
+        }
+        System.out.println("64k compiled runs took " + (System.currentTimeMillis() - start));
+        assert(equals_hex(hash, "ab3d155bf4bbb0aa3a71b7801089826186e44300e6932e6ffd287cf302bbb0ba"));
+        return true;
+    }
+
     public static void main(String[] args) {
         run_test(test_make1());
         run_test(test_hash_ctr1());
@@ -79,6 +103,8 @@ class Test {
         run_test(test_make2());
         run_test(test_hash_ctr3());
         run_test(test_hash_ctr4());
+        run_test(test_make3());
+        run_test(test_compiler_ctr1());
         System.out.println("\nAll tests were successful\n");
     }
 }

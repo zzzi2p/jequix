@@ -10,6 +10,7 @@ public class HXCtx {
     public int code_size;
     public final long[] keys;
     public byte[] seed;
+    public boolean compiled;
 
     public HXCtx(int sz) {
         code = new Instr[sz];
