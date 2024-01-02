@@ -28,8 +28,8 @@ public class Test {
       const char *encoded_hex;
     } vectors[] = {
 */
-    private static final int[] claimed = { 1, 0, 1000000, 1000000, 999999, 1000000, 1000000 };
-    private static final int[] validated = { 0, 0, 1000000, 0, 0, 0, 1000000 };
+    private static final int[] claimed = { 1, 0, 1000000, 1000000, 999999, 1000000, 100000 };
+    private static final int[] validated = { 0, 0, 1000000, 0, 0, 0, 100000 };
     private static final int[] retval = { -1, 0, 0, -1, -1, -1, 0 };
 
     private static final String[] V0 =

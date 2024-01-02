@@ -119,7 +119,7 @@ public class POW {
         long start = System.nanoTime();
         long claimedEffort = DataHelper.fromLong(proof, NONCE_LEN, 4);
         if (claimedEffort < effort) {
-            System.out.println("Proof does not meet required effort " + effort);
+            System.out.println("Proof claimed effort " + claimedEffort + " does not meet required effort " + effort);
             return false;
         }
         byte[] check = new byte[CHECK_LEN];
