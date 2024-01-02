@@ -141,9 +141,9 @@ public class POW {
         blake.update(check, 0, CHECK_LEN);
         byte[] bhash = blake.digest();
         long r = DataHelper.fromLong(bhash, 0, BLAKE2B_32_LEN);
-        long m = r * effort;
+        long m = r * claimedEffort;
         if (m > 0xffffffffL) {
-            System.out.println("Proof is less than claimed effort " + effort);
+            System.out.println("Proof is less than claimed effort " + claimedEffort);
             return false;
         }
         if (claimedEffort > effort) {
