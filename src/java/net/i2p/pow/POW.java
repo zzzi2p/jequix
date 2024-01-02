@@ -26,13 +26,26 @@ public class POW {
     // 116
     public static final int CHECK_LEN = CHALLENGE_LEN + SOLUTION_LEN;
     // 40
-    public static final int PROOF_LEN = NONCE_LEN + SOLUTION_LEN + EFFORT_LEN + SEED_PFX_LEN;
+    public static final int PROOF_LEN = NONCE_LEN + EFFORT_LEN + SEED_PFX_LEN + SOLUTION_LEN;
     public static final int BLAKE2B_32_LEN = 4;
 
     /**
-     *  @return 40 byte proof
+     *  Proof is 16 byte nonce, 4 byte effort, 4 byte seed prefix, 16 byte solution
+     *  Use a random 16 byte nonce
+     *
+     *  @return 40 byte proof or null
      */
     public static byte[] solve(HXCtx ctx, Hash hash, byte[] seed, int effort, int maxruns) {
+        return solve(ctx, hash, seed, effort, maxruns, null);
+    }
+
+    /**
+     *  Proof is 16 byte nonce, 4 byte effort, 4 byte seed prefix, 16 byte solution
+     *
+     *  @param nonce 16 bytes, or null to start with a random one
+     *  @return 40 byte proof or null
+     */
+    public static byte[] solve(HXCtx ctx, Hash hash, byte[] seed, int effort, int maxruns, byte[] initialNonce) {
         long start = System.currentTimeMillis();
         // leave room so we use the same buffer for the check
         byte[] challenge = new byte[CHECK_LEN];
@@ -42,7 +55,10 @@ public class POW {
         off += Hash.HASH_LENGTH;
         System.arraycopy(seed, 0, challenge, off, SEED_LEN);
         off += SEED_LEN;
-        RandomSource.getInstance().nextBytes(challenge, off, NONCE_LEN);
+        if (initialNonce != null)
+            System.arraycopy(initialNonce, 0, challenge, off, NONCE_LEN);
+        else
+            RandomSource.getInstance().nextBytes(challenge, off, NONCE_LEN);
         off += NONCE_LEN;
         DataHelper.toLong(challenge, off, 4, effort);
         System.out.println("Challenge:\n" + HexDump.dump(challenge, 0, CHALLENGE_LEN));
@@ -81,9 +97,9 @@ public class POW {
                 off = NONCE_LEN;
                 System.arraycopy(challenge, P.length + Hash.HASH_LENGTH + SEED_LEN + NONCE_LEN, rv, off, EFFORT_LEN);
                 off += EFFORT_LEN;
-                System.arraycopy(challenge, CHALLENGE_LEN, rv, off, SOLUTION_LEN);
-                off += SOLUTION_LEN;
                 System.arraycopy(seed, 0, rv, off, SEED_PFX_LEN);
+                off += SEED_PFX_LEN;
+                System.arraycopy(challenge, CHALLENGE_LEN, rv, off, SOLUTION_LEN);
                 System.out.println("Found proof with effort " + effort + " on run " + runs +
                                    " took " + (System.currentTimeMillis() - start) + " ms");
                 return rv;
@@ -113,7 +129,13 @@ public class POW {
         off += Hash.HASH_LENGTH;
         System.arraycopy(seed, 0, check, off, SEED_LEN);
         off += SEED_LEN;
-        System.arraycopy(proof, 0, check, off, NONCE_LEN + EFFORT_LEN + SOLUTION_LEN);
+        System.arraycopy(proof, 0, check, off, NONCE_LEN + EFFORT_LEN);
+        off += NONCE_LEN + EFFORT_LEN;
+        if (!DataHelper.eq(proof, NONCE_LEN + EFFORT_LEN, seed, 0, SEED_PFX_LEN)) {
+            System.out.println("Proof seed prefix mismatch");
+            return false;
+        }
+        System.arraycopy(proof, NONCE_LEN + EFFORT_LEN + SEED_PFX_LEN, check, off, SOLUTION_LEN);
         System.out.println("Verify:\n" + HexDump.dump(check));
         MessageDigest blake = new Blake2bMessageDigest(null, null, BLAKE2B_32_LEN);
         blake.update(check, 0, CHECK_LEN);
@@ -131,7 +153,7 @@ public class POW {
             //DataHelper.toLong(proof, NONCE_LEN, 4, effort);
         }
         char[] solution = new char[8];
-        off = NONCE_LEN + EFFORT_LEN;
+        off = NONCE_LEN + EFFORT_LEN + SEED_PFX_LEN;
         for (int j = 0; j < 8; j++) {
             solution[j] = (char) DataHelper.fromLong(proof, off, 2);
             off += 2;

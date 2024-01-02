@@ -2,6 +2,7 @@ package net.i2p.pow;
 
 import net.i2p.data.DataHelper;
 import net.i2p.data.Hash;
+import net.i2p.util.HexDump;
 
 import net.i2p.pow.equix.Heap;
 import net.i2p.pow.hashx.HXCtx;
@@ -135,12 +136,22 @@ public class Test {
         byte[] encoded = fromHex(v[4]);
         HXCtx ctx = new HXCtx(512);
         Hash h = new Hash(service_blinded_id);
+
+        // skip for the million effort
+        if (validated == 0) {
+            byte[] solution = POW.solve(ctx, h, seed, validated, 999, nonce);
+            if (solution != null) {
+                System.out.println("Calculated solution\n" + HexDump.dump(solution, 24, 16));
+                System.out.println("Test vector solution\n" + HexDump.dump(sol));
+            } else {
+                System.out.println("No solution calculated");
+            }
+        }
+
         byte[] proof = new byte[POW.PROOF_LEN];
-        // nonce, effort, solution 16 + 4 + 16
-        // skip the "01"
-        System.arraycopy(encoded, 1, proof, 0, POW.NONCE_LEN + POW.EFFORT_LEN + POW.SOLUTION_LEN);
-        // seed pfx
-        System.arraycopy(seed, 0, proof, 36, POW.SEED_PFX_LEN);
+        // proof is nonce/effort/prefix/solution
+        // skip the "01" in the vectors
+        System.arraycopy(encoded, 1, proof, 0, POW.PROOF_LEN);
         boolean ok = POW.verify(ctx, h, seed, validated, proof);
         System.out.println("Verify " + test_no + " expected " + (retval == 0) + " actual " + ok);
         ok = ok == (retval == 0);
