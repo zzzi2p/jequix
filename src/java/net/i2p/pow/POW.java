@@ -80,7 +80,7 @@ public class POW {
                 char[] solution = solutions[i];
                 off = CHALLENGE_LEN;
                 for (int j = 0; j < 8; j++) {
-                    DataHelper.toLong(challenge, off, 2, solution[j]);
+                    DataHelper.toLongLE(challenge, off, 2, solution[j]);
                     off += 2;
                 }
                 //System.out.println("check:\n" + HexDump.dump(challenge));
@@ -155,7 +155,7 @@ public class POW {
         char[] solution = new char[8];
         off = NONCE_LEN + EFFORT_LEN + SEED_PFX_LEN;
         for (int j = 0; j < 8; j++) {
-            solution[j] = (char) DataHelper.fromLong(proof, off, 2);
+            solution[j] = (char) DataHelper.fromLongLE(proof, off, 2);
             off += 2;
         }
         Result result = Equix.verify(ctx, check, CHALLENGE_LEN, solution);
