@@ -10,12 +10,6 @@ import net.i2p.pow.hashx.HXCtx;
  */
 class Solver {
 
-    private static long hash_value(HXCtx ctx, int index) {
-        byte[] hash = new byte[Equix.HASHX_SIZE];
-        HashX.exec(ctx, index, hash);
-        return HashX.fromLong8LE(hash, 0);
-    }
-
     private static void build_solution_stage1(char[] output, Heap heap, int root) {
         int bucket = ITEM_BUCKET(root);
         int bucket_inv = INVERT_BUCKET(bucket);
@@ -76,8 +70,11 @@ class Solver {
      */
     private static int stage0(HXCtx ctx, Heap heap) {
         heap.CLEAR_STAGE1();
+        byte[] hash = new byte[Equix.HASHX_SIZE];
         for (int i = 0; i < INDEX_SPACE; ++i) {
-            long value = hash_value(ctx, i);
+            //long value = hash_value(ctx, i);
+            HashX.exec(ctx, i, hash);
+            long value = HashX.fromLong8LE(hash, 0);
             int bucket_idx = (int) (value & NUM_COARSE_BUCKETS_MASK);
             int item_idx = heap.STAGE1_SIZE(bucket_idx);
             if (item_idx >= COARSE_BUCKET_ITEMS)
