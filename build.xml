@@ -19,7 +19,7 @@
 
         <!-- make the update xpi2p -->
         <!-- this contains everything except i2ptunnel.config -->
-        <copy file="LICENSE.txt" todir="plugin/" overwrite="true" />
+        <copy file="LICENSE" tofile="plugin/LICENSE.txt" overwrite="true" />
         <copy file="README.txt" todir="plugin/" overwrite="true" />
         <copy file="CHANGES.txt" todir="plugin/" overwrite="true" />
         <copy file="scripts/plugin.config" todir="plugin/" overwrite="true" />
