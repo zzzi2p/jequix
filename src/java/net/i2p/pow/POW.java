@@ -141,6 +141,7 @@ public class POW {
         blake.update(check, 0, CHECK_LEN);
         byte[] bhash = blake.digest();
         long r = DataHelper.fromLong(bhash, 0, BLAKE2B_32_LEN);
+        System.out.println("Actual effort: " + (0xffffffffL / r));
         long m = r * claimedEffort;
         if (m > 0xffffffffL) {
             System.out.println("Proof is less than claimed effort " + claimedEffort);
@@ -148,9 +149,6 @@ public class POW {
         }
         if (claimedEffort > effort) {
             System.out.println("Proof effort " + claimedEffort + " is more than required effort " + effort);
-            // replace effort in proof so it will validate
-            // no, can't do this
-            //DataHelper.toLong(proof, NONCE_LEN, 4, effort);
         }
         char[] solution = new char[8];
         off = NONCE_LEN + EFFORT_LEN + SEED_PFX_LEN;

@@ -120,6 +120,14 @@ public class Test {
     public static void main(String[] args) {
         test(V0, claimed[0], validated[0], retval[0]);
         test(V1, claimed[1], validated[1], retval[1]);
+        // bad vector? fails ORDER, otherwise good
+        // s0/1 15631 <= 31673 PASS
+        // s2/3 44188 <= 49440 PASS
+        // s4/5 5751 <= 41344 PASS
+        // s6/7 18595 <= 54088 PASS
+        // s01/23 1024424889 <= 2895954208 PASS
+        // s45/67 376938880 <= 1218696008 PASS
+        // s0123/4567 4399871398359384352 <= 1618940163409564488 FAIL
         test(V2, claimed[2], validated[2], retval[2]);
         test(V3, claimed[3], validated[3], retval[3]);
         test(V4, claimed[4], validated[4], retval[4]);

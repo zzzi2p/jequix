@@ -80,8 +80,30 @@ public class Equix {
     }
 
     public static Result verify(HXCtx ctx, byte[] challenge, int csz, char[] solution) {
-        if (!verify_order(solution))
+        if (!verify_order(solution)) {
+            char[] s = solution;
+            System.out.print("s0/1 " + (int) s[0] + " <= " + (int) s[1]);
+            System.out.println(s[0] <= s[1] ? " PASS" : " FAIL");
+            System.out.print("s2/3 " + (int) s[2] + " <= " + (int) s[3]);
+            System.out.println(s[2] <= s[3] ? " PASS" : " FAIL");
+            System.out.print("s4/5 " + (int) s[4] + " <= " + (int) s[5]);
+            System.out.println(s[4] <= s[5] ? " PASS" : " FAIL");
+            System.out.print("s6/7 " + (int) s[6] + " <= " + (int) s[7]);
+            System.out.println(s[6] <= s[7] ? " PASS" : " FAIL");
+            long l = (((long) s[0]) << 16) | s[1];
+            long r = (((long) s[2]) << 16) | s[3];
+            System.out.print("s01/23 " + l + " <= " + r);
+            System.out.println(l <= r ? " PASS" : " FAIL");
+            l = (((long) s[4]) << 16) | s[5];
+            r = (((long) s[6]) << 16) | s[7];
+            System.out.print("s45/67 " + l + " <= " + r);
+            System.out.println(l <= r ? " PASS" : " FAIL");
+            l = (((long) s[0]) << 48) | (((long) s[1]) << 32) | (((long) s[2]) << 16) | s[3];
+            r = (((long) s[4]) << 48) | (((long) s[5]) << 32) | (((long) s[6]) << 16) | s[7];
+            System.out.print("s0123/4567 " + Long.toUnsignedString(l) + " <= " + Long.toUnsignedString(r));
+            System.out.println(Long.compareUnsigned(l, r) <= 0 ? " PASS" : " FAIL");
             return ORDER;
+        }
         if (ctx.code_size == 0 || !DataHelper.eq(challenge, 0, ctx.seed, 0, csz)) {
             if (!HashX.make(ctx, challenge, csz)) {
                 System.out.println("FAILED to generate HashX for verifying");
