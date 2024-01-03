@@ -81,6 +81,7 @@ public class Equix {
 
     public static Result verify(HXCtx ctx, byte[] challenge, int csz, char[] solution) {
         if (!verify_order(solution)) {
+/*
             char[] s = solution;
             System.out.print("s0/1 " + (int) s[0] + " <= " + (int) s[1]);
             System.out.println(s[0] <= s[1] ? " PASS" : " FAIL");
@@ -102,6 +103,7 @@ public class Equix {
             r = (((long) s[4]) << 48) | (((long) s[5]) << 32) | (((long) s[6]) << 16) | s[7];
             System.out.print("s0123/4567 0x" + Long.toString(l, 16) + " <= 0x" + Long.toString(r, 16));
             System.out.println(Long.compareUnsigned(l, r) <= 0 ? " PASS" : " FAIL");
+*/
             return ORDER;
         }
         if (ctx.code_size == 0 || !DataHelper.eq(challenge, 0, ctx.seed, 0, csz)) {

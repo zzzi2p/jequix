@@ -53,6 +53,94 @@
         </exec>
     </target>
 
+    <target name="test" depends="testinterpreted, testcompiled" />
+    <target name="testinterpreted" depends="testhashxi, testequixi, testpowi, runpowi" />
+    <target name="testcompiled" depends="testhashxc, testequixc, testpowc, runpowc" />
+
+    <target name="testhashxi" depends="jar">
+        <java classname="net.i2p.pow.hashx.Test" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="src/build/jequix.jar" />
+                <pathelement location="../i2p.i2p/build/i2p.jar" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="testequixi" depends="jar">
+        <java classname="net.i2p.pow.equix.Test" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="src/build/jequix.jar" />
+                <pathelement location="../i2p.i2p/build/i2p.jar" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="testpowi" depends="jar">
+        <java classname="net.i2p.pow.Test" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="src/build/jequix.jar" />
+                <pathelement location="../i2p.i2p/build/i2p.jar" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="runpowi" depends="jar">
+        <java classname="net.i2p.pow.POW" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="src/build/jequix.jar" />
+                <pathelement location="../i2p.i2p/build/i2p.jar" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="testhashxc" depends="jar">
+        <java classname="net.i2p.pow.hashx.Test" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="src/build/jequix.jar" />
+                <pathelement location="../i2p.i2p/build/i2p.jar" />
+                <pathelement location="${ant.home}/lib/ant.jar" />
+                <pathelement location="${ant.home}/lib/ant-launcher.jar" />
+                <pathelement location="/usr/share/java/ecj.jar" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="testequixc" depends="jar">
+        <java classname="net.i2p.pow.equix.Test" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="src/build/jequix.jar" />
+                <pathelement location="../i2p.i2p/build/i2p.jar" />
+                <pathelement location="${ant.home}/lib/ant.jar" />
+                <pathelement location="${ant.home}/lib/ant-launcher.jar" />
+                <pathelement location="/usr/share/java/ecj.jar" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="testpowc" depends="jar">
+        <java classname="net.i2p.pow.Test" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="src/build/jequix.jar" />
+                <pathelement location="../i2p.i2p/build/i2p.jar" />
+                <pathelement location="${ant.home}/lib/ant.jar" />
+                <pathelement location="${ant.home}/lib/ant-launcher.jar" />
+                <pathelement location="/usr/share/java/ecj.jar" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="runpowc" depends="jar">
+        <java classname="net.i2p.pow.POW" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="src/build/jequix.jar" />
+                <pathelement location="../i2p.i2p/build/i2p.jar" />
+                <pathelement location="${ant.home}/lib/ant.jar" />
+                <pathelement location="${ant.home}/lib/ant-launcher.jar" />
+                <pathelement location="/usr/share/java/ecj.jar" />
+            </classpath>
+        </java>
+    </target>
+
     <target name="distclean" depends="clean" />
 
     <target name="clean" >
