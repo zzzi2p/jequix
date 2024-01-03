@@ -60,15 +60,17 @@ public class HashX {
         //print_registers("R", r, 8);
         if (ctx.code.length != GenCtx.REQUIREMENT_SIZE)
             throw new IllegalArgumentException();
+        boolean executed = false;
         if (ctx.compiled) {
-            Compiler.execute(ctx, r, "foo");
-        } else if (ctx.request_compile && !ctx.compile_failed) {
-            Compiler.compile(ctx, r, "foo");
-            if (ctx.compile_failed) {
-                System.out.println("FAILED compiling");
-                Exec.execute(ctx.code, r);
+            executed = Compiler.execute(ctx, r, Long.toUnsignedString(input));
+        }
+        if (!executed && ctx.request_compile && !ctx.compile_failed) {
+            executed = Compiler.compile(ctx, r, Long.toUnsignedString(input));
+            if (!executed) {
+                System.out.println("FAILED compiling program " + input);
             }
-        } else {
+        }
+        if (!executed) {
             Exec.execute(ctx.code, r);
         }
         //System.out.println("after exec regs");

@@ -14,12 +14,21 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Javac;
 import org.apache.tools.ant.types.Path;
 
+import net.i2p.I2PAppContext;
+import net.i2p.util.SecureFile;
+import net.i2p.util.SecureFileOutputStream;
+import net.i2p.util.SystemVersion;
+
 class Compiler {
+    private static final I2PAppContext _context = I2PAppContext.getGlobalContext();
+    private static final File _tmpDir = new SecureFile(_context.getTempDir(), "jequix-" + _context.random().nextLong());
     private static final ClassLoader cl;
+    private static boolean can_compile = !SystemVersion.isAndroid();
+
     static {
+        _tmpDir.mkdirs();
         try {
-            File file = new File(".");
-            URL url = file.toURI().toURL();
+            URL url = _tmpDir.toURI().toURL();
             URL[] urls = new URL[] { url };
             cl = new URLClassLoader(urls);
         } catch (Exception e) {
@@ -27,10 +36,22 @@ class Compiler {
         }
     }
 
+    /*
+     *  Compile and execute
+     *
+     *  @return success
+     */
     static boolean compile(HXCtx ctx, long[] r, String name) {
+        if (!can_compile) {
+            ctx.request_compile = false;
+            ctx.compiled = false;
+            ctx.compile_failed = true;
+            return false;
+        }
         long start = System.currentTimeMillis();
+        File src = new File(_tmpDir, "Compiled_" + name + ".java");
         try {
-            create(ctx, name);
+            create(ctx, name, src);
             long now = System.currentTimeMillis();
             now = System.currentTimeMillis();
             System.out.println("Generation took " + (now - start));
@@ -41,17 +62,21 @@ class Compiler {
             start = now;
             return execute(ctx, r, name);
         } catch (Throwable t) {
+            can_compile = false;
+            ctx.request_compile = false;
             ctx.compiled = false;
             ctx.compile_failed = true;
             t.printStackTrace();
             return false;
+        } finally {
+            src.delete();
         }
     }
 
-    private static void create(HXCtx ctx, String name) throws IOException {
+    private static void create(HXCtx ctx, String name, File f) throws IOException {
         PrintWriter out = null;
         try {
-            out = new PrintWriter(new OutputStreamWriter(new FileOutputStream("Compiled_" + name + ".java"), "UTF-8"));
+            out = new PrintWriter(new OutputStreamWriter(new SecureFileOutputStream(f), "UTF-8"));
             out.println("package net.i2p.pow.hashx;");
             out.println("public class Compiled_" + name + " {");
             out.println("public static void execute(long[] r) {");
@@ -86,11 +111,10 @@ class Compiler {
         proj.init();
         proj.initProperties();
         javac.setProject(proj);
-        Path dot = new Path(proj, ".");
+        Path dot = new Path(proj, _tmpDir.getPath());
         javac.setSrcdir(dot);
         javac.setIncludes("Compiled_" + name + ".java");
-        File fdot = new File(".");
-        javac.setDestdir(fdot);
+        javac.setDestdir(_tmpDir);
         Path cp = new Path(proj);
         cp.add(new Path(proj, "plugin/lib/jequix.jar"));
         cp.add(new Path(proj, "../i2p/build/i2p.jar"));
@@ -102,11 +126,21 @@ class Compiler {
         javac.execute();
     }
 
+    /*
+     *  Execute only, must be previously compiled
+     *
+     *  @return success
+     */
     public static boolean execute(HXCtx ctx, long[] r, String name) {
         try {
             if (ctx.compiled_method == null) {
-                Class<?> cls = cl.loadClass("net.i2p.pow.hashx.Compiled_" + name);
-                ctx.compiled_method = cls.getMethod("execute", long[].class);
+                try {
+                    Class<?> cls = cl.loadClass("net.i2p.pow.hashx.Compiled_" + name);
+                    ctx.compiled_method = cls.getMethod("execute", long[].class);
+                } finally {
+                    File f = new File(_tmpDir, "net/i2p/pow/hashx/Compiled_" + name + ".class");
+                    f.delete();
+                }
             }
             ctx.compiled_method.invoke(null, r);
             ctx.compiled = true;
