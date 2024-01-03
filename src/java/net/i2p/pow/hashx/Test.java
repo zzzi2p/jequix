@@ -74,7 +74,7 @@ class Test {
 
     private static boolean test_make3() {
         try {
-            boolean result = Compiler.compile(ctx_int, 1);
+            boolean result = Compiler.compile(ctx_int, 1, "foo");
             assert(result);
             return true;
         } catch (java.io.IOException ioe) {

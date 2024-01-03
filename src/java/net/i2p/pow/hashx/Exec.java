@@ -1,8 +1,8 @@
 package net.i2p.pow.hashx;
 
-class Exec {
+public class Exec {
 
-    static long umulh(long a, long b) {
+    public static long umulh(long a, long b) {
         long ah = ((a >> 32) & 0xffffffffL), al = a & 0xffffffffL;
         long bh = ((b >> 32) & 0xffffffffL), bl = b & 0xffffffffL;
         long x00 = al * bl;
@@ -16,7 +16,7 @@ class Exec {
         return (m3 << 32) + (m2 & 0xffffffffL);
     }
 
-    static long smulh(long a, long b) {
+    public static long smulh(long a, long b) {
         long hi = umulh(a, b);
         if (a < 0) hi -= b;
         if (b < 0) hi -= a;

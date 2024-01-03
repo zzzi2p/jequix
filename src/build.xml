@@ -2,11 +2,6 @@
 <project basedir="." default="all" name="i2psnark">
     <property name="i2pbase" value="../../i2p.i2p"/>
     <property name="i2plib" value="${i2pbase}/build"/>
-    <path id="cp">
-        <pathelement path="${java.class.path}" />
-        <pathelement location="${i2plib}/i2p.jar" />
-        <pathelement location="${ant.home}/lib/ant.jar"/>
-    </path>
 
     <target name="all" depends="clean, build" />
     <target name="build" depends="jar" />
@@ -23,8 +18,11 @@
             srcdir="./java" 
             debug="true" deprecation="on" source="${javac.version}" target="${javac.version}" 
             destdir="./build/obj" 
-            includeAntRuntime="false"
-            classpath="${i2plib}/i2p.jar" >
+            includeAntRuntime="false" >
+            <classpath>
+                <pathelement location="${i2plib}/i2p.jar" />
+                <pathelement location="${ant.home}/lib/ant.jar" />
+            </classpath>
             <compilerarg line="${javac.compilerargs}" />
         </javac>
     </target>

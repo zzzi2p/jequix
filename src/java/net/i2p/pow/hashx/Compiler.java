@@ -6,18 +6,42 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.taskdefs.Javac;
+import org.apache.tools.ant.types.Path;
 
 class Compiler {
 
-    static boolean compile(HXCtx ctx, long input) throws IOException {
-        PrintWriter out = null;
-        long[] r = new long[8];
-        SipHash.ctr_state512(ctx.keys, input, r);
+    static boolean compile(HXCtx ctx, long input, String name) throws IOException {
+        long start = System.currentTimeMillis();
         try {
-            out = new PrintWriter(new OutputStreamWriter(new FileOutputStream("Compiled.java"), "UTF-8"));
+            create(ctx, name);
+            long now = System.currentTimeMillis();
+            now = System.currentTimeMillis();
+            System.out.println("Generation took " + (now - start));
+            start = now;
+            doCompile(name);
+            now = System.currentTimeMillis();
+            System.out.println("Compile took " + (now - start));
+            start = now;
+            execute(ctx, input, name);
+        } catch (Throwable t) {
+            throw new IOException("compile failed", t);
+        }
+        return true;
+    }
+
+    private static void create(HXCtx ctx, String name) throws IOException {
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(new OutputStreamWriter(new FileOutputStream("Compiled_" + name + ".java"), "UTF-8"));
             out.println("package net.i2p.pow.hashx;");
-            out.println("class Compiled {");
-            out.println("static void execute(long[] r) {");
+            out.println("public class Compiled_" + name + " {");
+            out.println("public static void execute(long[] r) {");
             out.println("long r0 = r[0];");
             out.println("long r1 = r[1];");
             out.println("long r2 = r[2];");
@@ -41,7 +65,40 @@ class Compiler {
         } finally {
             if (out != null) out.close();
         }
-        return true;
+    }
+
+    private static void doCompile(String name) throws Exception {
+        Javac javac = new Javac();
+        Project proj = new Project();
+        proj.init();
+        proj.initProperties();
+        javac.setProject(proj);
+        Path dot = new Path(proj, ".");
+        javac.setSrcdir(dot);
+        javac.setIncludes("Compiled_" + name + ".java");
+        File fdot = new File(".");
+        javac.setDestdir(fdot);
+        Path cp = new Path(proj);
+        cp.add(new Path(proj, "plugin/lib/jequix.jar"));
+        cp.add(new Path(proj, "../i2p/build/i2p.jar"));
+        javac.setCompiler("org.eclipse.jdt.core.JDTCompilerAdapter");
+        javac.setFork(false);
+        javac.setIncludejavaruntime(false);
+        javac.setIncludeantruntime(true);
+        javac.setOptimize(true);
+        javac.execute();
+    }
+
+    public static void execute(HXCtx ctx, long input, String name) throws Exception {
+        File file = new File(".");
+        URL url = file.toURI().toURL();
+        URL[] urls = new URL[] { url };
+        ClassLoader cl = new URLClassLoader(urls);
+        Class<?> cls = cl.loadClass("net.i2p.pow.hashx.Compiled_" + name);
+        Method exec = cls.getMethod("execute", long[].class);
+        long[] r = new long[8];
+        SipHash.ctr_state512(ctx.keys, input, r);
+        exec.invoke(null, r);
     }
 
     static void generate(Instr[] program, PrintWriter out) throws IOException {
