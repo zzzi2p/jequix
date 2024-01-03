@@ -1,7 +1,7 @@
 Java Equi-X
 ---------------------------
 
-Tor-compatible PoW, Equi-X(60,3), and HashX.
+Tor-compatible HS PoW, Equi-X(60,3), and HashX.
 
 References:
 
@@ -9,7 +9,7 @@ References:
 - https://github.com/tevador/equix
 - https://github.com/tevador/hashx
 
-While PoW is well-specified, Equi-X and HashX are poorly undocumented,
+While PoW is well-specified, Equi-X and HashX are poorly documented,
 and almost impossible to specify. All HashX program generation code,
 including the deterministic RNG, must be reproduced exactly.
 This is a fairly direct translation of tevador's C code to Java,
@@ -17,6 +17,7 @@ and is therefore licensed the same as that code, LGPLv3.
 
 Equi-X and HashX test vectors are from those projects and all pass.
 
+PoW 60 byte proof (without the leading 0x01) is identical to Tor's HS PoW.
 PoW test vectors are from Tor and licensed the same as Tor (BSD).
 One test is failing for unknown reasons.
 
