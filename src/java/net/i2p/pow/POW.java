@@ -66,6 +66,9 @@ public class POW {
         Heap heap = new Heap();
         char[][] solutions = new char[8][8];
 
+        if (effort > 2)
+            ctx.request_compile = true;
+
         int runs = 0;
         while (runs++ < maxruns) {
             int count = Equix.solve(ctx, heap, challenge, CHALLENGE_LEN, solutions, 0);
@@ -76,6 +79,8 @@ public class POW {
             }
 
             MessageDigest blake = new Blake2bMessageDigest(null, null, BLAKE2B_32_LEN);
+            // TODO find the solution with the best effort, not the first one,
+            // if server is sorting by actual effort
             for (int i = 0; i < count; i++) {
                 char[] solution = solutions[i];
                 off = CHALLENGE_LEN;
