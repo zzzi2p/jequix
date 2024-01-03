@@ -104,9 +104,11 @@ class Compiler {
 
     public static boolean execute(HXCtx ctx, long[] r, String name) {
         try {
-            Class<?> cls = cl.loadClass("net.i2p.pow.hashx.Compiled_" + name);
-            Method exec = cls.getMethod("execute", long[].class);
-            exec.invoke(null, r);
+            if (ctx.compiled_method == null) {
+                Class<?> cls = cl.loadClass("net.i2p.pow.hashx.Compiled_" + name);
+                ctx.compiled_method = cls.getMethod("execute", long[].class);
+            }
+            ctx.compiled_method.invoke(null, r);
             ctx.compiled = true;
             return true;
         } catch (Throwable t) {

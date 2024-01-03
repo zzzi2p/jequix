@@ -100,11 +100,13 @@ public class Equix {
             System.out.println(l <= r ? " PASS" : " FAIL");
             l = (((long) s[0]) << 48) | (((long) s[1]) << 32) | (((long) s[2]) << 16) | s[3];
             r = (((long) s[4]) << 48) | (((long) s[5]) << 32) | (((long) s[6]) << 16) | s[7];
-            System.out.print("s0123/4567 " + Long.toUnsignedString(l) + " <= " + Long.toUnsignedString(r));
+            System.out.print("s0123/4567 0x" + Long.toString(l, 16) + " <= 0x" + Long.toString(r, 16));
             System.out.println(Long.compareUnsigned(l, r) <= 0 ? " PASS" : " FAIL");
             return ORDER;
         }
         if (ctx.code_size == 0 || !DataHelper.eq(challenge, 0, ctx.seed, 0, csz)) {
+            ctx.compiled = false;
+            ctx.compiled_method = null;
             if (!HashX.make(ctx, challenge, csz)) {
                 System.out.println("FAILED to generate HashX for verifying");
                 return CHALLENGE;

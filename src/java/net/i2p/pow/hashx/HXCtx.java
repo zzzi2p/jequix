@@ -1,5 +1,7 @@
 package net.i2p.pow.hashx;
 
+import java.lang.reflect.Method;
+
 /**
  *  Top-level context
  *  Containing the generated program
@@ -11,6 +13,7 @@ public class HXCtx {
     public final long[] keys;
     public byte[] seed;
     public boolean request_compile, compiled, compile_failed;
+    public Method compiled_method;
 
     public HXCtx(int sz) {
         code = new Instr[sz];
