@@ -22,18 +22,10 @@ import net.i2p.util.SystemVersion;
 class Compiler {
     private static final I2PAppContext _context = I2PAppContext.getGlobalContext();
     private static final File _tmpDir = new SecureFile(_context.getTempDir(), "jequix-" + _context.random().nextLong());
-    private static final ClassLoader cl;
     private static boolean can_compile = !SystemVersion.isAndroid();
 
     static {
         _tmpDir.mkdirs();
-        try {
-            URL url = _tmpDir.toURI().toURL();
-            URL[] urls = new URL[] { url };
-            cl = new URLClassLoader(urls);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /*
@@ -135,6 +127,9 @@ class Compiler {
         try {
             if (ctx.compiled_method == null) {
                 try {
+                    URL url = _tmpDir.toURI().toURL();
+                    URL[] urls = new URL[] { url };
+                    ClassLoader cl = new URLClassLoader(urls);
                     Class<?> cls = cl.loadClass("net.i2p.pow.hashx.Compiled_" + name);
                     ctx.compiled_method = cls.getMethod("execute", long[].class);
                 } finally {
