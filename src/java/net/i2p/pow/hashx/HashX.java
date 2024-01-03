@@ -60,10 +60,17 @@ public class HashX {
         //print_registers("R", r, 8);
         if (ctx.code.length != GenCtx.REQUIREMENT_SIZE)
             throw new IllegalArgumentException();
-        if (ctx.compiled)
-            Compiled.execute(r);
-        else
+        if (ctx.compiled) {
+            Compiler.execute(ctx, r, "foo");
+        } else if (ctx.request_compile && !ctx.compile_failed) {
+            Compiler.compile(ctx, r, "foo");
+            if (ctx.compile_failed) {
+                System.out.println("FAILED compiling");
+                Exec.execute(ctx.code, r);
+            }
+        } else {
             Exec.execute(ctx.code, r);
+        }
         //System.out.println("after exec regs");
         //print_registers("R", r, 8);
         /* Hash finalization to remove bias toward 0 caused by multiplications */

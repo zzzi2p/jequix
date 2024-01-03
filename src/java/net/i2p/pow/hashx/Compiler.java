@@ -15,8 +15,19 @@ import org.apache.tools.ant.taskdefs.Javac;
 import org.apache.tools.ant.types.Path;
 
 class Compiler {
+    private static final ClassLoader cl;
+    static {
+        try {
+            File file = new File(".");
+            URL url = file.toURI().toURL();
+            URL[] urls = new URL[] { url };
+            cl = new URLClassLoader(urls);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    static boolean compile(HXCtx ctx, long input, String name) throws IOException {
+    static boolean compile(HXCtx ctx, long[] r, String name) {
         long start = System.currentTimeMillis();
         try {
             create(ctx, name);
@@ -28,11 +39,13 @@ class Compiler {
             now = System.currentTimeMillis();
             System.out.println("Compile took " + (now - start));
             start = now;
-            execute(ctx, input, name);
+            return execute(ctx, r, name);
         } catch (Throwable t) {
-            throw new IOException("compile failed", t);
+            ctx.compiled = false;
+            ctx.compile_failed = true;
+            t.printStackTrace();
+            return false;
         }
-        return true;
     }
 
     private static void create(HXCtx ctx, String name) throws IOException {
@@ -89,16 +102,19 @@ class Compiler {
         javac.execute();
     }
 
-    public static void execute(HXCtx ctx, long input, String name) throws Exception {
-        File file = new File(".");
-        URL url = file.toURI().toURL();
-        URL[] urls = new URL[] { url };
-        ClassLoader cl = new URLClassLoader(urls);
-        Class<?> cls = cl.loadClass("net.i2p.pow.hashx.Compiled_" + name);
-        Method exec = cls.getMethod("execute", long[].class);
-        long[] r = new long[8];
-        SipHash.ctr_state512(ctx.keys, input, r);
-        exec.invoke(null, r);
+    public static boolean execute(HXCtx ctx, long[] r, String name) {
+        try {
+            Class<?> cls = cl.loadClass("net.i2p.pow.hashx.Compiled_" + name);
+            Method exec = cls.getMethod("execute", long[].class);
+            exec.invoke(null, r);
+            ctx.compiled = true;
+            return true;
+        } catch (Throwable t) {
+            ctx.compiled = false;
+            ctx.compile_failed = true;
+            t.printStackTrace();
+            return false;
+        }
     }
 
     static void generate(Instr[] program, PrintWriter out) throws IOException {

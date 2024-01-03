@@ -73,21 +73,15 @@ class Test {
     }
 
     private static boolean test_make3() {
-        try {
-            boolean result = Compiler.compile(ctx_int, 1, "foo");
-            assert(result);
-            return true;
-        } catch (java.io.IOException ioe) {
-            ioe.printStackTrace();
-            assert(false);
-            return false;
-        }
+        byte[] hash = new byte[HASHX_SIZE];
+        ctx_int.request_compile = true;
+        HashX.exec(ctx_int, 1, hash);
+        return true;
     }
 
     private static boolean test_compiler_ctr1() {
         byte[] hash = new byte[HASHX_SIZE];
         long start = System.currentTimeMillis();
-        ctx_int.compiled = true;
         for (int i = 0; i < 65536; i++) {
             HashX.exec(ctx_int, counter2, hash);
         }
