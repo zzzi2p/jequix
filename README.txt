@@ -33,4 +33,11 @@ about 2-3x slower than HashX compiled mode.
 Equi-X requires 1.8 MB of heap to find solutions.
 This implementation uses about the same, plus lots of Java overhead of course.
 
+PoW is currently single-threaded, multi-threading is not yet supported.
+PoW verification is extremely fast, as in the C code.
+
 Blake2b code is adapted from Noise, see LICENSE-Noise.txt.
+
+Build requires ant, and i2p source in ../i2p.i2p.
+Runtime requires i2p.jar.
+I2P dependency is only for a few utilities.
