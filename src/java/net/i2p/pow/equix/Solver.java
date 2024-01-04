@@ -319,7 +319,7 @@ class Solver {
         long start = System.currentTimeMillis();
         stage0(ctx, heap);
         long now = System.currentTimeMillis();
-        System.out.println("stage0() took " + (now - start));
+        System.out.println("stage0() took " + (now - start) + " (threads: " + ctx.threads + ")");
         start = now;
 
         stage1(heap);

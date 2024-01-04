@@ -66,11 +66,14 @@ public class POW {
         Heap heap = new Heap();
         char[][] solutions = new char[8][8];
 
-        if (effort > 2)
+        if (effort > 2) {
             ctx.request_compile = true;
+            ctx.threads = 4;
+        }
 
         int runs = 0;
         while (runs++ < maxruns) {
+            System.out.println("Starting run " + runs);
             int count = Equix.solve(ctx, heap, challenge, CHALLENGE_LEN, solutions, 0);
             if (count == 0) {
                 System.out.println("No solutions found on run " + runs);
@@ -176,10 +179,12 @@ public class POW {
     }
 
     public static void main(String[] args) {
+        int effort = 8;
+        if (args.length > 0)
+            effort = Integer.parseInt(args[0]);
         HXCtx ctx = new HXCtx(512);
         Hash h = Hash.FAKE_HASH;
         byte[] seed = h.getData();
-        int effort = 8;
         byte[] proof = solve(ctx, h, seed, effort, 999);
         if (proof != null) {
             System.out.println("Found solution:\n" + HexDump.dump(proof));

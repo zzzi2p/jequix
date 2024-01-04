@@ -27,6 +27,8 @@ public class HashX {
      */
     public static boolean make(HXCtx ctx, byte[] seed, int size) {
         long start = System.currentTimeMillis();
+        ctx.compiled = false;
+        ctx.compiled_method = null;
         ctx.seed = Arrays.copyOf(seed, size);
         MessageDigest blake = new Blake2bMessageDigest(HASHX_PERSONAL, HASHX_SALT);
         blake.update(seed, 0, size);

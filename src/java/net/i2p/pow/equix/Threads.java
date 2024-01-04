@@ -33,7 +33,7 @@ class Threads {
      */
     private static class CustomThreadPoolExecutor extends ThreadPoolExecutor {
         public CustomThreadPoolExecutor() {
-             super(0, Integer.MAX_VALUE, HANDLER_KEEPALIVE_MS, TimeUnit.MILLISECONDS,
+             super(4, Integer.MAX_VALUE, HANDLER_KEEPALIVE_MS, TimeUnit.MILLISECONDS,
                    new SynchronousQueue<Runnable>(), new CustomThreadFactory());
         }
     }
@@ -46,6 +46,7 @@ class Threads {
             Thread rv = Executors.defaultThreadFactory().newThread(r);
             rv.setName("jequix hasher " + _executorThreadCount.incrementAndGet());
             rv.setDaemon(true);
+            System.out.println("Starting thread " + rv.getName());
             return rv;
         }
     }

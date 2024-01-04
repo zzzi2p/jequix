@@ -69,6 +69,7 @@ public class Equix {
      */
     public static int solve(HXCtx ctx, Heap heap, byte[] challenge, int csz, char[][] solutions, int solution_count) {
         if (ctx.code_size == 0 || !DataHelper.eq(challenge, 0, ctx.seed, 0, csz)) {
+            System.out.println("Generating new HashX for solving");
             if (!HashX.make(ctx, challenge, csz)) {
                 System.out.println("FAILED to generate HashX for solving");
                 return 0;
