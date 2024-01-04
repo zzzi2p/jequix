@@ -129,6 +129,27 @@ public class Test {
         run_test(test_verify3());
         run_test(test_verify4());
         run_test(test_permutations());
+        System.out.println("4 threads");
+        num_solutions = 0;
+        ctx.threads = 4;
+        run_test(test_solve());
+        run_test(test_verify1());
+        System.out.println("1 thread, compile and run");
+        num_solutions = 0;
+        ctx.threads = 1;
+        ctx.request_compile = true;
+        run_test(test_solve());
+        run_test(test_verify1());
+        System.out.println("1 thread, run compiled");
+        num_solutions = 0;
+        run_test(test_solve());
+        run_test(test_verify1());
+        System.out.println("4 threads, run compiled");
+        num_solutions = 0;
+        ctx.threads = 4;
+        ctx.request_compile = true;
+        run_test(test_solve());
+        run_test(test_verify1());
         System.out.println("\nAll tests were successful\n");
     }
 }

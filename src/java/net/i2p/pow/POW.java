@@ -61,7 +61,7 @@ public class POW {
             RandomSource.getInstance().nextBytes(challenge, off, NONCE_LEN);
         off += NONCE_LEN;
         DataHelper.toLong(challenge, off, 4, effort);
-        System.out.println("Challenge:\n" + HexDump.dump(challenge, 0, CHALLENGE_LEN));
+        //System.out.println("Challenge:\n" + HexDump.dump(challenge, 0, CHALLENGE_LEN));
 
         Heap heap = new Heap();
         char[][] solutions = new char[8][8];
@@ -141,7 +141,7 @@ public class POW {
             return false;
         }
         System.arraycopy(proof, NONCE_LEN + EFFORT_LEN + SEED_PFX_LEN, check, off, SOLUTION_LEN);
-        System.out.println("Verify:\n" + HexDump.dump(check));
+        //System.out.println("Verify:\n" + HexDump.dump(check));
         MessageDigest blake = new Blake2bMessageDigest(null, null, BLAKE2B_32_LEN);
         blake.update(check, 0, CHECK_LEN);
         byte[] bhash = blake.digest();
