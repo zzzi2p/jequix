@@ -41,6 +41,7 @@ public class HashX {
             // program execution keys
             ctx.keys[i] = fromLong8LE(hash, 32 + (i * 8));
         }
+        ctx.name = Long.toUnsignedString(pkeys[0]);
         //System.out.println("init seed\n" + net.i2p.util.HexDump.dump(seed, 0, size));
         //System.out.println("init keys\n" + net.i2p.util.HexDump.dump(hash));
         //System.out.println("init pkeys");
@@ -64,10 +65,10 @@ public class HashX {
             throw new IllegalArgumentException();
         boolean executed = false;
         if (ctx.compiled) {
-            executed = Compiler.execute(ctx, r, Long.toUnsignedString(input));
+            executed = Compiler.execute(ctx, r);
         }
         if (!executed && ctx.request_compile && !ctx.compile_failed) {
-            executed = Compiler.compile(ctx, r, Long.toUnsignedString(input));
+            executed = Compiler.compile(ctx, r);
             if (!executed) {
                 System.out.println("FAILED compiling program " + input);
             }

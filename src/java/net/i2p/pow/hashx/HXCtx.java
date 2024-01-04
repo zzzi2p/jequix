@@ -15,6 +15,7 @@ public class HXCtx {
     public boolean request_compile, compiled, compile_failed;
     public Method compiled_method;
     public int threads = 1;
+    public String name;
 
     public HXCtx(int sz) {
         code = new Instr[sz];

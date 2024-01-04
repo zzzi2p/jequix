@@ -34,7 +34,7 @@ class Compiler {
      *
      *  @return success
      */
-    static boolean compile(HXCtx ctx, long[] r, String name) {
+    static boolean compile(HXCtx ctx, long[] r) {
         synchronized(ctx) {
             if (!can_compile) {
                 ctx.request_compile = false;
@@ -42,10 +42,12 @@ class Compiler {
                 ctx.compile_failed = true;
                 return false;
             }
+            String name = ctx.name;
+            System.out.println("Generating program " + name);
             long start = System.currentTimeMillis();
             File src = new File(_tmpDir, "Compiled_" + name + ".java");
             try {
-                create(ctx, name, src);
+                create(ctx, src);
                 long now = System.currentTimeMillis();
                 now = System.currentTimeMillis();
                 System.out.println("Generation took " + (now - start));
@@ -65,7 +67,7 @@ class Compiler {
                 src.delete();
             }
             try {
-                return execute(ctx, r, name);
+                return execute(ctx, r);
             } catch (Throwable t) {
                 synchronized(ctx) {
                     can_compile = false;
@@ -79,7 +81,8 @@ class Compiler {
         }
     }
 
-    private static void create(HXCtx ctx, String name, File f) throws IOException {
+    private static void create(HXCtx ctx, File f) throws IOException {
+        String name = ctx.name;
         PrintWriter out = null;
         try {
             out = new PrintWriter(new OutputStreamWriter(new SecureFileOutputStream(f), "UTF-8"));
@@ -137,7 +140,8 @@ class Compiler {
      *
      *  @return success
      */
-    public static boolean execute(HXCtx ctx, long[] r, String name) {
+    public static boolean execute(HXCtx ctx, long[] r) {
+        String name = ctx.name;
         try {
             if (ctx.compiled_method == null) {
                 try {

@@ -183,8 +183,9 @@ public class POW {
         if (args.length > 0)
             effort = Integer.parseInt(args[0]);
         HXCtx ctx = new HXCtx(512);
-        Hash h = Hash.FAKE_HASH;
-        byte[] seed = h.getData();
+        byte[] seed = new byte[Hash.HASH_LENGTH];
+        RandomSource.getInstance().nextBytes(seed);
+        Hash h = new Hash(seed);
         byte[] proof = solve(ctx, h, seed, effort, 999);
         if (proof != null) {
             System.out.println("Found solution:\n" + HexDump.dump(proof));
