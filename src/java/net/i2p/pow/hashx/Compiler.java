@@ -24,6 +24,7 @@ class Compiler {
     //private static final File _tmpDir = new SecureFile(_context.getTempDir(), "jequix-" + _context.random().nextLong());
     private static final File _tmpDir = new File("tmp");
     private static boolean can_compile = !SystemVersion.isAndroid();
+    private static final boolean PRESERVE_PROGRAM = false;
 
     static {
         _tmpDir.mkdirs();
@@ -64,7 +65,8 @@ class Compiler {
                 t.printStackTrace();
                 return false;
             } finally {
-                src.delete();
+                if (!PRESERVE_PROGRAM)
+                    src.delete();
             }
             try {
                 return execute(ctx, r);
@@ -218,11 +220,9 @@ class Compiler {
                     // unused
                     //out.println("target = " + i + ";");
                     if (has_target) {
-                        // there may be multiple targets before the first branch
-                        out.println("// no branch to previous target");
-                        //out.println("System.out.println(\"// no branch to previous target\");");
-                        out.println("break;");
-                        out.println("} // for loop");
+                        // there may not be multiple targets before the first branch
+                        // can't happen
+                        throw new IllegalStateException("no branch to previous target");
                     } else {
                         has_target = true;
                     }
@@ -246,8 +246,8 @@ class Compiler {
                         //out.println("branch_idx++;");
                         has_target = false;
                     } else {
-                        //out.println("System.out.println(\"// branch without target at " + i + "\");");
-                        out.println("// branch without target at " + i);
+                        // can't happen
+                        throw new IllegalStateException("branch without target at " + i);
                     }
                     break;
 
@@ -255,10 +255,9 @@ class Compiler {
                     break;
             }
         }
-        // target but no branch?
+        // target but no branch? can't happen
         if (has_target) {
-            out.println("// EOF no branch instruction found to target");
-            out.println("} // for loop");
+            throw new IllegalStateException("no branch instruction");
         }
     }
 }
