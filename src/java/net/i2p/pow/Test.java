@@ -168,6 +168,9 @@ public class Test {
         System.out.println("Verify " + test_no + " expected " + (retval == 0) + " actual " + ok);
         ok = ok == (retval == 0);
         System.out.println("Test " + test_no + (ok ? " PASSED" : " FAILED"));
+        // see above
+        if (test_no != 4)
+            assert(ok);
     }
 
     private static byte[] fromHex(String v) {
