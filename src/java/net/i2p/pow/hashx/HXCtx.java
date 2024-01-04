@@ -14,6 +14,7 @@ public class HXCtx {
     public byte[] seed;
     public boolean request_compile, compiled, compile_failed;
     public Method compiled_method;
+    public int threads = 1;
 
     public HXCtx(int sz) {
         code = new Instr[sz];
