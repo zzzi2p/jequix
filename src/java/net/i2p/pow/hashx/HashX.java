@@ -29,6 +29,7 @@ public class HashX {
         long start = System.currentTimeMillis();
         ctx.compiled = false;
         ctx.compiled_method = null;
+        ctx.code_size = 0;
         ctx.seed = Arrays.copyOf(seed, size);
         MessageDigest blake = new Blake2bMessageDigest(HASHX_PERSONAL, HASHX_SALT);
         blake.update(seed, 0, size);
