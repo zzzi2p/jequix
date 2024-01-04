@@ -155,6 +155,7 @@
         <delete>
             <fileset dir="." includes="*/*.~ **/*.*~ */**/*.*~ *.*~" />
         </delete>
+        <delete dir="tmp/" />
         <delete file="plugin/plugin.config" />
         <delete dir="plugin/lib/" />
         <delete file="plugin/CHANGES.txt" />
