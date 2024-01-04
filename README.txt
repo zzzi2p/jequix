@@ -17,7 +17,7 @@ and is therefore licensed the same as that code, LGPLv3.
 
 Equi-X and HashX test vectors are from those projects and all pass.
 
-PoW 60 byte proof (without the leading 0x01) is identical to Tor's HS PoW.
+PoW 40 byte proof (without the leading 0x01) is identical to Tor's HS PoW.
 PoW test vectors are from Tor and licensed the same as Tor (BSD).
 One test is failing for unknown reasons.
 
