@@ -59,6 +59,7 @@
 
     <target name="testhashxi" depends="jar">
         <java classname="net.i2p.pow.hashx.Test" fork="true" failonerror="true">
+            <assertions><enable/></assertions>
             <classpath>
                 <pathelement location="src/build/jequix.jar" />
                 <pathelement location="../i2p.i2p/build/i2p.jar" />
@@ -68,6 +69,7 @@
 
     <target name="testequixi" depends="jar">
         <java classname="net.i2p.pow.equix.Test" fork="true" failonerror="true">
+            <assertions><enable/></assertions>
             <classpath>
                 <pathelement location="src/build/jequix.jar" />
                 <pathelement location="../i2p.i2p/build/i2p.jar" />
@@ -77,6 +79,7 @@
 
     <target name="testpowi" depends="jar">
         <java classname="net.i2p.pow.Test" fork="true" failonerror="true">
+            <assertions><enable/></assertions>
             <classpath>
                 <pathelement location="src/build/jequix.jar" />
                 <pathelement location="../i2p.i2p/build/i2p.jar" />
@@ -95,6 +98,7 @@
 
     <target name="testhashxc" depends="jar">
         <java classname="net.i2p.pow.hashx.Test" fork="true" failonerror="true">
+            <assertions><enable/></assertions>
             <classpath>
                 <pathelement location="src/build/jequix.jar" />
                 <pathelement location="../i2p.i2p/build/i2p.jar" />
@@ -107,6 +111,7 @@
 
     <target name="testequixc" depends="jar">
         <java classname="net.i2p.pow.equix.Test" fork="true" failonerror="true">
+            <assertions><enable/></assertions>
             <classpath>
                 <pathelement location="src/build/jequix.jar" />
                 <pathelement location="../i2p.i2p/build/i2p.jar" />
@@ -119,6 +124,7 @@
 
     <target name="testpowc" depends="jar">
         <java classname="net.i2p.pow.Test" fork="true" failonerror="true">
+            <assertions><enable/></assertions>
             <classpath>
                 <pathelement location="src/build/jequix.jar" />
                 <pathelement location="../i2p.i2p/build/i2p.jar" />
