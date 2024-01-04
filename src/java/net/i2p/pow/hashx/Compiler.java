@@ -20,8 +20,9 @@ import net.i2p.util.SecureFileOutputStream;
 import net.i2p.util.SystemVersion;
 
 class Compiler {
-    private static final I2PAppContext _context = I2PAppContext.getGlobalContext();
-    private static final File _tmpDir = new SecureFile(_context.getTempDir(), "jequix-" + _context.random().nextLong());
+    //private static final I2PAppContext _context = I2PAppContext.getGlobalContext();
+    //private static final File _tmpDir = new SecureFile(_context.getTempDir(), "jequix-" + _context.random().nextLong());
+    private static final File _tmpDir = new File("tmp");
     private static boolean can_compile = !SystemVersion.isAndroid();
 
     static {
