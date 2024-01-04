@@ -34,34 +34,47 @@ class Compiler {
      *  @return success
      */
     static boolean compile(HXCtx ctx, long[] r, String name) {
-        if (!can_compile) {
-            ctx.request_compile = false;
-            ctx.compiled = false;
-            ctx.compile_failed = true;
-            return false;
-        }
-        long start = System.currentTimeMillis();
-        File src = new File(_tmpDir, "Compiled_" + name + ".java");
-        try {
-            create(ctx, name, src);
-            long now = System.currentTimeMillis();
-            now = System.currentTimeMillis();
-            System.out.println("Generation took " + (now - start));
-            start = now;
-            doCompile(name);
-            now = System.currentTimeMillis();
-            System.out.println("Compile took " + (now - start));
-            start = now;
-            return execute(ctx, r, name);
-        } catch (Throwable t) {
-            can_compile = false;
-            ctx.request_compile = false;
-            ctx.compiled = false;
-            ctx.compile_failed = true;
-            t.printStackTrace();
-            return false;
-        } finally {
-            src.delete();
+        synchronized(ctx) {
+            if (!can_compile) {
+                ctx.request_compile = false;
+                ctx.compiled = false;
+                ctx.compile_failed = true;
+                return false;
+            }
+            long start = System.currentTimeMillis();
+            File src = new File(_tmpDir, "Compiled_" + name + ".java");
+            try {
+                create(ctx, name, src);
+                long now = System.currentTimeMillis();
+                now = System.currentTimeMillis();
+                System.out.println("Generation took " + (now - start));
+                start = now;
+                doCompile(name);
+                ctx.compiled = true;
+                now = System.currentTimeMillis();
+                System.out.println("Compile took " + (now - start));
+            } catch (Throwable t) {
+                can_compile = false;
+                ctx.request_compile = false;
+                ctx.compiled = false;
+                ctx.compile_failed = true;
+                t.printStackTrace();
+                return false;
+            } finally {
+                src.delete();
+            }
+            try {
+                return execute(ctx, r, name);
+            } catch (Throwable t) {
+                synchronized(ctx) {
+                    can_compile = false;
+                    ctx.request_compile = false;
+                    ctx.compiled = false;
+                    ctx.compile_failed = true;
+                }
+                t.printStackTrace();
+                return false;
+            }
         }
     }
 
@@ -138,7 +151,6 @@ class Compiler {
                 }
             }
             ctx.compiled_method.invoke(null, r);
-            ctx.compiled = true;
             return true;
         } catch (Throwable t) {
             ctx.compiled = false;
