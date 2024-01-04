@@ -28,7 +28,7 @@ class Program {
         int mask = 0;
         int popcnt = 0;
         while (popcnt < LOG2_BRANCH_PROB) {
-            int bit = gen.nextByte() % 32;
+            int bit = gen.nextByte() & 0x1f;
             int bitmask = 1 << bit;
             if ((mask & bitmask) == 0) {
                 mask |= bitmask;
