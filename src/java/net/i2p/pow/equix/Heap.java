@@ -23,6 +23,7 @@ public class Heap {
     //stage1_idx_hashtab stage1_indices;           /* 172 544 bytes */
     // 256 * 2 = 512
     private final char[] stage1_counts = new char[NUM_COARSE_BUCKETS];
+
     // 256 * 336 * 2 = 172032
     private final char[][] stage1_buckets = new char[NUM_COARSE_BUCKETS][COARSE_BUCKET_ITEMS];
 
@@ -179,8 +180,16 @@ public class Heap {
         return stage3_counts[buck];
     }
 
-    void SET_STAGE1_SIZE(int buck, int val) {
-        stage1_counts[buck] = (char) val;
+    int GET_AND_INCREMENT_STAGE1_SIZE(int buck) {
+        return stage1_counts[buck]++;
+    }
+
+    /** because GET_AND_INCREMENT will go over. Call before stage 1. */
+    void CEILING_STAGE1_SIZES() {
+        for (int i = 0; i < NUM_COARSE_BUCKETS; i++) {
+            if (stage1_counts[i] > COARSE_BUCKET_ITEMS)
+                stage1_counts[i] = COARSE_BUCKET_ITEMS;
+        }
     }
 
     void SET_STAGE2_SIZE(int buck, int val) {

@@ -34,6 +34,7 @@ about 2-3x slower than HashX compiled mode.
 Equi-X requires 1.8 MB of heap to find solutions.
 This implementation uses about the same, plus lots of Java overhead of course.
 
+Equi-X solving supports multi-threading within a single context.
 PoW is currently single-threaded, multi-threading is not yet supported.
 PoW verification is extremely fast, as in the C code.
 

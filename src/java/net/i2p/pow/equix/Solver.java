@@ -1,5 +1,7 @@
 package net.i2p.pow.equix;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static net.i2p.pow.equix.Heap.*;
 import static net.i2p.pow.equix.Util.*;
 import net.i2p.pow.hashx.HashX;
@@ -65,28 +67,127 @@ class Solver {
         }
     }
 
+    private static class PartialRunner implements Runnable {
+        private final HXCtx ctx;
+        private final Heap heap;
+        private final int start, end;
+        private final AtomicInteger lock;
+
+        public PartialRunner(HXCtx ctx, Heap heap, int start, int end, AtomicInteger lock) {
+            this.ctx = ctx;
+            this.heap = heap;
+            this.start = start;
+            this.end = end;
+            this.lock = lock;
+        }
+
+        public void run() {
+            try {
+                stage0a_multithread(ctx, heap, start, end);
+            } finally {
+                synchronized(lock) {
+                    int remaining = lock.decrementAndGet();
+                    System.out.println("Thread for hashes " + start + "-" + (end - 1) + " done, remaining: " + remaining);
+                    if (remaining == 0)
+                        lock.notify();
+                }
+            }
+        }
+    }
+
     /**
      *  Calculate and store 64K HashX hashes in stage1 data
      */
-    private static int stage0(HXCtx ctx, Heap heap) {
+    private static void stage0(HXCtx ctx, Heap heap) {
         heap.CLEAR_STAGE1();
+        int threads = ctx.threads;
+        if (threads <= 1) {
+            stage0_singlethread(ctx, heap);
+            heap.CEILING_STAGE1_SIZES();
+        } else {
+            if (threads >= 16)
+                threads = 16;
+            else if (threads >= 8)
+                threads = 8;
+            else if (threads >= 4)
+                threads = 4;
+            else
+                threads = 2;
+            AtomicInteger lock = new AtomicInteger(threads);
+            int sz = INDEX_SPACE / threads;
+            // so the last one is the first part of the indexes,
+            // give the cache time to flush for the threads
+            int start = INDEX_SPACE - sz;
+            for (int i = 0; i < threads; i++) {
+                Runnable r = new PartialRunner(ctx, heap, start, start + sz, lock);
+                if (i < threads - 1)
+                    Threads.execute(r);
+                else // do the last one inline
+                    r.run();
+                start -= sz;
+            }
+            synchronized(lock) {
+                while (lock.get() > 0) {
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException ie) {
+                        break;
+                    }
+                }
+            }
+            heap.CEILING_STAGE1_SIZES();
+            stage0b_multithread(ctx, heap);
+        }
+    }
+
+    /**
+     *  Calculate and store 64K HashX hashes in stage1 data
+     */
+    private static void stage0_singlethread(HXCtx ctx, Heap heap) {
         byte[] hash = new byte[Equix.HASHX_SIZE];
         for (int i = 0; i < INDEX_SPACE; ++i) {
-            //long value = hash_value(ctx, i);
             HashX.exec(ctx, i, hash);
             long value = HashX.fromLong8LE(hash, 0);
             int bucket_idx = (int) (value & NUM_COARSE_BUCKETS_MASK);
-            int item_idx = heap.STAGE1_SIZE(bucket_idx);
+            int item_idx = heap.GET_AND_INCREMENT_STAGE1_SIZE(bucket_idx);
             if (item_idx >= COARSE_BUCKET_ITEMS)
                 continue;
-            heap.SET_STAGE1_SIZE(bucket_idx, item_idx + 1);
             heap.SET_STAGE1_IDX(bucket_idx, item_idx, i);
             // 52 bits = 13 bytes
             value >>= NUM_COARSE_BUCKETS_BITS;
             value &= 0xfffffffffffffL;
             heap.SET_STAGE1_DATA(bucket_idx, item_idx, value);
         }
-        return 0;
+    }
+
+    /**
+     *  Calculate and temporarily store 64K HashX hashes in stage2 data
+     */
+    private static void stage0a_multithread(HXCtx ctx, Heap heap, int start, int end) {
+        byte[] hash = new byte[Equix.HASHX_SIZE];
+        for (int i = start; i < end; ++i) {
+            HashX.exec(ctx, i, hash);
+            long value = HashX.fromLong8LE(hash, 0);
+            heap.SET_STAGE2_DATA(i >> 8, i & 0xff, value);
+        }
+    }
+
+    /**
+     *  Move temporarily stored 64K HashX hashes from stage2 data to stage1 data
+     */
+    private static void stage0b_multithread(HXCtx ctx, Heap heap) {
+        for (int i = 0; i < INDEX_SPACE; ++i) {
+            long value = heap.STAGE2_DATA(i >> 8, i & 0xff);
+            int bucket_idx = (int) (value & NUM_COARSE_BUCKETS_MASK);
+            int item_idx = heap.GET_AND_INCREMENT_STAGE1_SIZE(bucket_idx);
+            if (item_idx >= COARSE_BUCKET_ITEMS)
+                continue;
+            heap.SET_STAGE1_IDX(bucket_idx, item_idx, i);
+            // 52 bits = 13 bytes
+            value >>= NUM_COARSE_BUCKETS_BITS;
+            value &= 0xfffffffffffffL;
+            heap.SET_STAGE1_DATA(bucket_idx, item_idx, value);
+        }
     }
 
     /**
