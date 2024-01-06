@@ -42,4 +42,7 @@ Blake2b code is adapted from Noise, see LICENSE-Noise.txt.
 
 Build requires ant, and i2p source in ../i2p.i2p.
 Runtime requires i2p.jar.
+For optional compilation at runtime, ant and ECJ are required.
+ECJ is now provided by eclipse-jdt: sudo apt install libeclipse-jdt-core-java,
+the older libecj-java package is not recommended.
 I2P dependency is only for a few utilities.
