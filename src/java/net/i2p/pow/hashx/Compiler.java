@@ -1,5 +1,6 @@
 package net.i2p.pow.hashx;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -87,7 +88,7 @@ class Compiler {
         String name = ctx.name;
         PrintWriter out = null;
         try {
-            out = new PrintWriter(new OutputStreamWriter(new SecureFileOutputStream(f), "UTF-8"));
+            out = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(new SecureFileOutputStream(f)), "ISO-8859-1"));
             out.println("package net.i2p.pow.hashx;");
             out.println("public class Compiled_" + name + " {");
             out.println("public static void execute(long[] r) {");
