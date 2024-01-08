@@ -32,7 +32,7 @@ class Compiler {
     }
 
     /*
-     *  Compile and execute
+     *  Compile only. Call execute() on success.
      *
      *  @return success
      */
@@ -69,18 +69,7 @@ class Compiler {
                 if (!PRESERVE_PROGRAM)
                     src.delete();
             }
-            try {
-                return execute(ctx, r);
-            } catch (Throwable t) {
-                synchronized(ctx) {
-                    can_compile = false;
-                    ctx.request_compile = false;
-                    ctx.compiled = false;
-                    ctx.compile_failed = true;
-                }
-                t.printStackTrace();
-                return false;
-            }
+            return true;
         }
     }
 
