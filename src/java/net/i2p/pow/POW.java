@@ -198,7 +198,9 @@ public class POW {
         HXCtx ctx = new HXCtx(512);
         byte[] seed = new byte[Hash.HASH_LENGTH];
         RandomSource.getInstance().nextBytes(seed);
-        Hash h = new Hash(seed);
+        byte[] hash = new byte[Hash.HASH_LENGTH];
+        RandomSource.getInstance().nextBytes(hash);
+        Hash h = new Hash(hash);
         byte[] proof = solve(ctx, h, seed, effort, 999);
         if (proof != null) {
             System.out.println("Found solution:\n" + HexDump.dump(proof));

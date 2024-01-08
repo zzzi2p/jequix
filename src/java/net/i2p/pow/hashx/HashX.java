@@ -50,7 +50,7 @@ public class HashX {
         //System.out.println("init ekeys");
         //print_registers("exec key", ctx.keys, 4);
         boolean rv = Program.generate(pkeys, ctx);
-        System.out.println("make() took " + (System.currentTimeMillis() - start));
+        System.out.println("make() for id " + ctx.name + " took " + (System.currentTimeMillis() - start));
         //System.out.println("program:");
         //print_program(ctx);
         return rv;
