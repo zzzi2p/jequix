@@ -14,6 +14,10 @@ import net.i2p.pow.equix.Result;
 import net.i2p.pow.equix.Heap;
 import net.i2p.pow.hashx.HXCtx;
 
+/**
+ *  ref: https://spec.torproject.org/hspow-spec/v1-equix.html
+ *  ref: https://spec.torproject.org/rend-spec/introduction-protocol.html#INTRO1_POW_EXT
+ */
 public class POW {
     public static final byte[] P = DataHelper.getASCII("Tor hs intro v1\0");
     public static final int SEED_LEN = 32;
@@ -47,6 +51,8 @@ public class POW {
      */
     public static byte[] solve(HXCtx ctx, Hash hash, byte[] seed, int effort, int maxruns, byte[] initialNonce) {
         long start = System.currentTimeMillis();
+        // create the 100 byte challenge:
+        // 16 byte P string, 32 byte hash, 32 byte seed, 16 byte nonce, 4 byte effort
         // leave room so we use the same buffer for the check
         byte[] challenge = new byte[CHECK_LEN];
         System.arraycopy(P, 0, challenge, 0, P.length);
@@ -72,6 +78,7 @@ public class POW {
         }
 
         int runs = 0;
+        MessageDigest blake = new Blake2bMessageDigest(null, null, BLAKE2B_32_LEN);
         while (runs++ < maxruns) {
             System.out.println("Starting run " + runs);
             int count = Equix.solve(ctx, heap, challenge, CHALLENGE_LEN, solutions, 0);
@@ -81,25 +88,28 @@ public class POW {
                 continue;
             }
 
-            MessageDigest blake = new Blake2bMessageDigest(null, null, BLAKE2B_32_LEN);
             // TODO find the solution with the best effort, not the first one,
             // if server is sorting by actual effort
             for (int i = 0; i < count; i++) {
                 char[] solution = solutions[i];
                 off = CHALLENGE_LEN;
+                // append the 16 byte solution to the challenge
                 for (int j = 0; j < 8; j++) {
                     DataHelper.toLongLE(challenge, off, 2, solution[j]);
                     off += 2;
                 }
+                // blake2b-32 of the 116 byte check bytes
                 //System.out.println("check:\n" + HexDump.dump(challenge));
                 blake.update(challenge, 0, CHECK_LEN);
                 byte[] bhash = blake.digest();
+                // r is the 4 byte check value
                 long r = DataHelper.fromLong(bhash, 0, BLAKE2B_32_LEN);
                 long m = r * effort;
                 if (m > 0xffffffffL) {
                     System.out.println("Solution " + i + " does not meet effort " + effort);
                     continue;
                 }
+                // 40 byte proof: 16 byte nonce, 4 byte effort, 4 byte seed prefix, 16 byte solution
                 byte[] rv = new byte[PROOF_LEN];
                 System.arraycopy(challenge, P.length + Hash.HASH_LENGTH + SEED_LEN, rv, 0, NONCE_LEN);
                 off = NONCE_LEN;
@@ -130,6 +140,7 @@ public class POW {
             System.out.println("Proof claimed effort " + claimedEffort + " does not meet required effort " + effort);
             return false;
         }
+        // construct 116 byte check array
         byte[] check = new byte[CHECK_LEN];
         System.arraycopy(P, 0, check, 0, P.length);
         int off = P.length;
@@ -145,9 +156,11 @@ public class POW {
         }
         System.arraycopy(proof, NONCE_LEN + EFFORT_LEN + SEED_PFX_LEN, check, off, SOLUTION_LEN);
         //System.out.println("Verify:\n" + HexDump.dump(check));
+        // blake2b-32 of the 116 byte check bytes
         MessageDigest blake = new Blake2bMessageDigest(null, null, BLAKE2B_32_LEN);
         blake.update(check, 0, CHECK_LEN);
         byte[] bhash = blake.digest();
+        // r is the 4 byte check value
         long r = DataHelper.fromLong(bhash, 0, BLAKE2B_32_LEN);
         System.out.println("Actual effort: " + (0xffffffffL / r));
         long m = r * claimedEffort;
