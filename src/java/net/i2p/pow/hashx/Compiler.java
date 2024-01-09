@@ -163,7 +163,8 @@ class Compiler {
         boolean has_target = false;
         for (int i = 0; i < program.length; i++) {
             Instr instr = program[i];
-            out.println("// " + i + ": " + instr);
+            if (PRESERVE_PROGRAM)
+                out.println("// " + i + ": " + instr);
             //out.println("System.out.println(\"// inst " + i + " \" + r0 + ' ' + r1 + ' ' + r2 + ' ' + r3 + ' ' + r4 + ' ' + r5 + ' ' + r6 + ' ' + r7);");
             switch (instr.opcode) {
                 case INSTR_UMULH_R:
