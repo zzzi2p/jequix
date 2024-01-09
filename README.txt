@@ -25,8 +25,9 @@ Interpreted hash rate is about 150K hashes/sec, which is a little
 slower than the C interpreted speed.
 
 HashX compilation is supported if ant and ECJ are available at runtime.
-This provides about a 10X speedup after the compilation,
-which takes about 750 ms.
+This provides about a 10X speedup after the compilation.
+The first compilation takes about 750 ms to load the ant and ECJ classes,
+but subsequent compiles are about 50-100 ms.
 
 Compiled hash rate is currently about 1.5 million hashes/sec, which is
 about 2-3x slower than HashX compiled mode.
