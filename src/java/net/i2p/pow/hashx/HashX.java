@@ -27,7 +27,7 @@ public class HashX {
      */
     public static boolean make(HXCtx ctx, byte[] seed, int size) {
         long start = System.currentTimeMillis();
-        ctx.compiled = false;
+        ctx.state = CompiledState.INIT;
         ctx.compiled_method = null;
         ctx.code_size = 0;
         ctx.seed = Arrays.copyOf(seed, size);
@@ -64,21 +64,20 @@ public class HashX {
         //print_registers("R", r, 8);
         if (ctx.code.length != GenCtx.REQUIREMENT_SIZE)
             throw new IllegalArgumentException();
-        boolean compiled;
+        CompiledState state;
         synchronized(ctx) {
-            compiled = ctx.compiled;
-            if (!compiled && ctx.request_compile && !ctx.compile_failed) {
-                compiled = Compiler.compile(ctx, r);
-                if (!compiled)
+            state = ctx.state;
+            if (state == CompiledState.REQUESTED) {
+                state = Compiler.compile(ctx, r);
+                if (state == CompiledState.FAILED)
                     System.out.println("FAILED compiling program " + input);
             }
         }
         boolean executed = false;
-        if (compiled)
+        if (state == CompiledState.COMPILED)
             executed = Compiler.execute(ctx, r);
-        if (!executed) {
+        if (!executed)
             Exec.execute(ctx.code, r);
-        }
         //System.out.println("after exec regs");
         //print_registers("R", r, 8);
         /* Hash finalization to remove bias toward 0 caused by multiplications */

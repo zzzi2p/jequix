@@ -5,6 +5,7 @@ import java.util.Arrays;
 import net.i2p.data.DataHelper;
 
 import static net.i2p.pow.equix.Util.SWAP_IDX;
+import net.i2p.pow.hashx.CompiledState;
 import net.i2p.pow.hashx.HXCtx;
 
 /**
@@ -137,7 +138,7 @@ public class Test {
         System.out.println("1 thread, compile and run");
         num_solutions = 0;
         ctx.threads = 1;
-        ctx.request_compile = true;
+        ctx.state = CompiledState.REQUESTED;
         run_test(test_solve());
         run_test(test_verify1());
         System.out.println("1 thread, run compiled");
@@ -147,7 +148,7 @@ public class Test {
         System.out.println("4 threads, run compiled");
         num_solutions = 0;
         ctx.threads = 4;
-        ctx.request_compile = true;
+        ctx.state = CompiledState.REQUESTED;
         run_test(test_solve());
         run_test(test_verify1());
         System.out.println("\nAll tests were successful\n");

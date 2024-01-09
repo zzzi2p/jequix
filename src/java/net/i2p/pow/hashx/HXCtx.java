@@ -12,7 +12,7 @@ public class HXCtx {
     public int code_size;
     public final long[] keys;
     public byte[] seed;
-    public boolean request_compile, compiled, compile_failed;
+    public CompiledState state = CompiledState.INIT;
     public Method compiled_method;
     public int threads = 1;
     public String name;

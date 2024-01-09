@@ -5,6 +5,7 @@ import net.i2p.data.Hash;
 import net.i2p.util.HexDump;
 
 import net.i2p.pow.equix.Heap;
+import net.i2p.pow.hashx.CompiledState;
 import net.i2p.pow.hashx.HXCtx;
 
 /**
@@ -146,7 +147,7 @@ public class Test {
         byte[] encoded = fromHex(v[4]);
         HXCtx ctx = new HXCtx(512);
         if (test_no != 0)
-            ctx.request_compile = true;
+            ctx.state = CompiledState.REQUESTED;
         Hash h = new Hash(service_blinded_id);
 
         // skip for the million effort

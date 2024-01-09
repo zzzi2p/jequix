@@ -20,6 +20,9 @@ import net.i2p.util.SecureFile;
 import net.i2p.util.SecureFileOutputStream;
 import net.i2p.util.SystemVersion;
 
+import static net.i2p.pow.hashx.CompiledState.*;
+
+
 class Compiler {
     //private static final I2PAppContext _context = I2PAppContext.getGlobalContext();
     //private static final File _tmpDir = new SecureFile(_context.getTempDir(), "jequix-" + _context.random().nextLong());
@@ -34,15 +37,13 @@ class Compiler {
     /*
      *  Compile only. Call execute() on success.
      *
-     *  @return success
+     *  @return COMPILED or FAILED
      */
-    static boolean compile(HXCtx ctx, long[] r) {
+    static CompiledState compile(HXCtx ctx, long[] r) {
         synchronized(ctx) {
             if (!can_compile) {
-                ctx.request_compile = false;
-                ctx.compiled = false;
-                ctx.compile_failed = true;
-                return false;
+                ctx.state = FAILED;
+                return FAILED;
             }
             String name = ctx.name;
             System.out.println("Generating program " + name);
@@ -55,21 +56,19 @@ class Compiler {
                 System.out.println("Generation took " + (now - start));
                 start = now;
                 doCompile(name);
-                ctx.compiled = true;
+                ctx.state = COMPILED;
                 now = System.currentTimeMillis();
                 System.out.println("Compile took " + (now - start));
             } catch (Throwable t) {
+                ctx.state = FAILED;
                 can_compile = false;
-                ctx.request_compile = false;
-                ctx.compiled = false;
-                ctx.compile_failed = true;
                 t.printStackTrace();
-                return false;
+                return FAILED;
             } finally {
                 if (!PRESERVE_PROGRAM)
                     src.delete();
             }
-            return true;
+            return COMPILED;
         }
     }
 
@@ -150,8 +149,7 @@ class Compiler {
             ctx.compiled_method.invoke(null, r);
             return true;
         } catch (Throwable t) {
-            ctx.compiled = false;
-            ctx.compile_failed = true;
+            ctx.state = FAILED;
             t.printStackTrace();
             return false;
         }

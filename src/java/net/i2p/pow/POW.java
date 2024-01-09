@@ -12,6 +12,7 @@ import com.southernstorm.noise.crypto.blake.Blake2bMessageDigest;
 import net.i2p.pow.equix.Equix;
 import net.i2p.pow.equix.Result;
 import net.i2p.pow.equix.Heap;
+import net.i2p.pow.hashx.CompiledState;
 import net.i2p.pow.hashx.HXCtx;
 
 /**
@@ -73,7 +74,7 @@ public class POW {
         char[][] solutions = new char[8][8];
 
         if (effort > 2) {
-            ctx.request_compile = true;
+            ctx.state = CompiledState.REQUESTED;
             ctx.threads = 4;
         }
 

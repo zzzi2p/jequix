@@ -74,7 +74,7 @@ class Test {
 
     private static boolean test_make3() {
         byte[] hash = new byte[HASHX_SIZE];
-        ctx_int.request_compile = true;
+        ctx_int.state = CompiledState.REQUESTED;
         HashX.exec(ctx_int, 1, hash);
         return true;
     }

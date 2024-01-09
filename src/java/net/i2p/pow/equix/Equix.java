@@ -4,6 +4,7 @@ import net.i2p.data.DataHelper;
 
 import static net.i2p.pow.equix.Result.*;
 import static net.i2p.pow.equix.Util.*;
+import net.i2p.pow.hashx.CompiledState;
 import net.i2p.pow.hashx.HashX;
 import net.i2p.pow.hashx.HXCtx;
 
@@ -108,7 +109,7 @@ public class Equix {
             return ORDER;
         }
         if (ctx.code_size == 0 || !DataHelper.eq(challenge, 0, ctx.seed, 0, csz)) {
-            ctx.compiled = false;
+            ctx.state = CompiledState.INIT;
             ctx.compiled_method = null;
             if (!HashX.make(ctx, challenge, csz)) {
                 System.out.println("FAILED to generate HashX for verifying");
