@@ -149,7 +149,7 @@ class Compiler {
             ctx.compiled_method.invoke(null, r);
             return true;
         } catch (Throwable t) {
-            ctx.state = FAILED;
+            ctx.state = RUN_FAILED;
             t.printStackTrace();
             return false;
         }

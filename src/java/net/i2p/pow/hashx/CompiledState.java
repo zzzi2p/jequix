@@ -7,5 +7,6 @@ public enum CompiledState {
     INIT,
     REQUESTED,
     COMPILED,
-    FAILED
+    FAILED,
+    RUN_FAILED
 }

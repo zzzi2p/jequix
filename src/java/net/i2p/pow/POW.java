@@ -73,15 +73,14 @@ public class POW {
         Heap heap = new Heap();
         char[][] solutions = new char[8][8];
 
-        if (effort > 2) {
-            ctx.state = CompiledState.REQUESTED;
-            ctx.threads = 4;
-        }
-
         int runs = 0;
         MessageDigest blake = new Blake2bMessageDigest(null, null, BLAKE2B_32_LEN);
         while (runs++ < maxruns) {
             System.out.println("Starting run " + runs);
+            if (effort > 2) {
+                ctx.state = CompiledState.REQUESTED;
+                ctx.threads = 4;
+            }
             int count = Equix.solve(ctx, heap, challenge, CHALLENGE_LEN, solutions, 0);
             if (count == 0) {
                 System.out.println("No solutions found on run " + runs);
