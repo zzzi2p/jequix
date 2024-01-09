@@ -34,6 +34,8 @@ public class POW {
     public static final int PROOF_LEN = NONCE_LEN + EFFORT_LEN + SEED_PFX_LEN + SOLUTION_LEN;
     public static final int BLAKE2B_32_LEN = 4;
 
+    private static final boolean FIND_BEST_SOLUTION = true;
+
     /**
      *  Proof is 16 byte nonce, 4 byte effort, 4 byte seed prefix, 16 byte solution
      *  Use a random 16 byte nonce
@@ -88,8 +90,10 @@ public class POW {
                 continue;
             }
 
-            // TODO find the solution with the best effort, not the first one,
+            // find the solution with the best effort, not the first one,
             // if server is sorting by actual effort
+            char[] bestSolution = null;
+            long bestM = Long.MAX_VALUE;
             for (int i = 0; i < count; i++) {
                 char[] solution = solutions[i];
                 off = CHALLENGE_LEN;
@@ -109,6 +113,25 @@ public class POW {
                     System.out.println("Solution " + i + " does not meet effort " + effort);
                     continue;
                 }
+                if (m < bestM) {
+                    if (bestSolution == null)
+                        System.out.println("Found first solution " + i + " with actual effort " + (0xffffffffL / r));
+                    else
+                        System.out.println("Found better solution " + i + " with actual effort " + (0xffffffffL / r));
+                    bestM = m;
+                    bestSolution = solution;
+                    if (!FIND_BEST_SOLUTION)
+                        break;
+                } else {
+                    System.out.println("Solution " + i + " with actual effort " + (0xffffffffL / r) + " not as good as previous");
+                }
+            }
+            if (bestSolution != null) {
+                off = CHALLENGE_LEN;
+                for (int j = 0; j < 8; j++) {
+                    DataHelper.toLongLE(challenge, off, 2, bestSolution[j]);
+                    off += 2;
+                }
                 // 40 byte proof: 16 byte nonce, 4 byte effort, 4 byte seed prefix, 16 byte solution
                 byte[] rv = new byte[PROOF_LEN];
                 System.arraycopy(challenge, P.length + Hash.HASH_LENGTH + SEED_LEN, rv, 0, NONCE_LEN);
@@ -118,7 +141,7 @@ public class POW {
                 System.arraycopy(seed, 0, rv, off, SEED_PFX_LEN);
                 off += SEED_PFX_LEN;
                 System.arraycopy(challenge, CHALLENGE_LEN, rv, off, SOLUTION_LEN);
-                System.out.println("Found proof with effort " + effort + " on run " + runs +
+                System.out.println("Found proof of effort " + effort + " on run " + runs +
                                    " took " + (System.currentTimeMillis() - start) + " ms");
                 return rv;
             }
