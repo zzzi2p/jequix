@@ -27,7 +27,8 @@ public class HashX {
      */
     public static boolean make(HXCtx ctx, byte[] seed, int size) {
         long start = System.currentTimeMillis();
-        ctx.state = CompiledState.INIT;
+        if (ctx.state != CompiledState.REQUESTED)
+            ctx.state = CompiledState.INIT;
         ctx.compiled_method = null;
         ctx.code_size = 0;
         ctx.seed = Arrays.copyOf(seed, size);
