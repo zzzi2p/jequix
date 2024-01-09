@@ -59,7 +59,11 @@ class Test {
     private static boolean test_hash_ctr3() {
         byte[] hash = new byte[HASHX_SIZE];
         // yes test 3 uses counter 2 in the C test
-        HashX.exec(ctx_int, counter2, hash);
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 65536; i++) {
+            HashX.exec(ctx_int, counter2, hash);
+        }
+        System.out.println("64k interpreted runs took " + (System.currentTimeMillis() - start));
         assert(equals_hex(hash, "ab3d155bf4bbb0aa3a71b7801089826186e44300e6932e6ffd287cf302bbb0ba"));
         return true;
     }
