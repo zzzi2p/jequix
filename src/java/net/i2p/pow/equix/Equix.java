@@ -84,6 +84,7 @@ public class Equix {
     }
 
     public static Result verify(HXCtx ctx, byte[] challenge, int csz, char[] solution) {
+        long start = System.nanoTime();
         if (!verify_order(solution)) {
 /*
             char[] s = solution;
@@ -121,6 +122,9 @@ public class Equix {
         } else if (ctx.code_size != REQUIREMENT_SIZE) {
             throw new IllegalArgumentException("code size is " + ctx.code_size);
         }
-        return verify_internal(ctx, solution);
+        Result rv = verify_internal(ctx, solution);
+        long now = System.currentTimeMillis();
+        System.out.println("Verify result: " + rv + " took " + ((System.nanoTime() - start) / 1000) + " us");
+        return rv;
     }
 }
