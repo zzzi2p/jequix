@@ -115,15 +115,15 @@ public class POW {
                 }
                 if (m < bestM) {
                     if (bestSolution == null)
-                        System.out.println("Found first solution " + i + " with actual effort " + (0xffffffffL / r));
+                        System.out.println("Found first solution " + i + " with actual effort " + (0xffffffffL / (double) r));
                     else
-                        System.out.println("Found better solution " + i + " with actual effort " + (0xffffffffL / r));
+                        System.out.println("Found better solution " + i + " with actual effort " + (0xffffffffL / (double) r));
                     bestM = m;
                     bestSolution = solution;
                     if (!FIND_BEST_SOLUTION)
                         break;
                 } else {
-                    System.out.println("Solution " + i + " with actual effort " + (0xffffffffL / r) + " not as good as previous");
+                    System.out.println("Solution " + i + " with actual effort " + (0xffffffffL / (double) r) + " not as good as previous");
                 }
             }
             if (bestSolution != null) {
