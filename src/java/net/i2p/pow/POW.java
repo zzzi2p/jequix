@@ -227,6 +227,8 @@ public class POW {
         byte[] proof = solve(ctx, h, seed, effort, 999);
         if (proof != null) {
             System.out.println("Found solution:\n" + HexDump.dump(proof));
+            // force regenerate w/o compile for test
+            ctx.state = CompiledState.INIT;
             boolean ok = verify(ctx, h, seed, effort, proof);
             if (ok)
                 System.out.println("Proof verify success");
