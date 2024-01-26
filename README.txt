@@ -30,14 +30,23 @@ The first compilation takes about 750 ms to load the ant and ECJ classes,
 but subsequent compiles are about 50-100 ms.
 
 Compiled hash rate is currently about 1.5 million hashes/sec, which is
-about 2-3x slower than HashX compiled mode.
+about 2-3x slower than HashX compiled mode. Compilation is definitely
+worth it for the solver, which runs 64K hashes per program.
+Unfortunately, the compilation overhead makes this uncompetitive
+with the C implementation.
 
 Equi-X requires 1.8 MB of heap to find solutions.
 This implementation uses about the same, plus lots of Java overhead of course.
 
 Equi-X solving supports multi-threading within a single context.
-PoW is currently single-threaded, multi-threading is not yet supported.
-PoW verification is extremely fast, as in the C code.
+Thread count must be a power of two. Multi-threading provides
+speedups without increasing memory usage.
+PoW is currently single-threaded, multi-threading (one for each seed) is not yet supported.
+PoW multi-threading would require 1.8 MB of heap for each thread.
+PoW verification is relatively fast, as in the C code.
+As verification only requires 8 hashes (vs 64K hashes for each solution attempt),
+verification does not benefit from compilation as the overhead is too great.
+
 
 Blake2b code is adapted from Noise, see LICENSE-Noise.txt.
 
